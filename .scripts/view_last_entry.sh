@@ -30,3 +30,5 @@ if [ -f "$JOURNAL" ]; then
 else
   echo "Журнал за сегодня еще не создан."
 fi
+
+afplay /System/Library/Sounds/Pop.aiff 2>/dev/null &
