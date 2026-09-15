@@ -15,6 +15,7 @@ TARGET="$VAULT/Входящие/Заметка_$TIMESTAMP.md"
 CONTENT=$(pbpaste)
 
 if [ -z "$CONTENT" ]; then
+  afplay /System/Library/Sounds/Basso.aiff 2>/dev/null &
   osascript -e 'display notification "Буфер обмена пуст" with title "Лабораторный: Входящие"'
   exit 1
 fi
@@ -34,4 +35,5 @@ cat << INBOX_EOF > "$TARGET"
 $CONTENT
 INBOX_EOF
 
+afplay /System/Library/Sounds/Pop.aiff 2>/dev/null &
 osascript -e "display notification \"Сохранено во Входящие: Заметка_$TIMESTAMP.md\" with title \"Лабораторный\""

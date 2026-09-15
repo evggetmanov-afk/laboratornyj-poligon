@@ -16,6 +16,7 @@ TARGET="$VAULT/Вахтенный_журнал/${DATE_STR}_Журнал.md"
 CONTENT=$(pbpaste)
 
 if [ -z "$CONTENT" ]; then
+  afplay /System/Library/Sounds/Basso.aiff 2>/dev/null &
   osascript -e 'display notification "Буфер обмена пуст" with title "Лабораторный: Журнал"'
   exit 1
 fi
@@ -41,4 +42,5 @@ cat << DAILY_APPEND_EOF >> "$TARGET"
 $CONTENT
 DAILY_APPEND_EOF
 
+afplay /System/Library/Sounds/Pop.aiff 2>/dev/null &
 osascript -e "display notification \"Добавлено в журнал за $DATE_STR\" with title \"Лабораторный\""
