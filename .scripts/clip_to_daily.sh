@@ -1,8 +1,10 @@
 #!/bin/bash
+
 # @raycast.schemaVersion 1
-# @raycast.title Добавить в Дневной журнал
+# @raycast.title [Лабораторный] Добавить в Дневной журнал
 # @raycast.mode silent
 # @raycast.packageName Лабораторный Полигон
+# @raycast.icon 🔬
 
 VAULT="/Users/getmanov/Лабораторный_полигон"
 DATE_STR=$(date +"%Y-%m-%d")
@@ -11,7 +13,7 @@ TARGET="$VAULT/Вахтенный_журнал/${DATE_STR}_Журнал.md"
 CONTENT=$(pbpaste)
 
 if [ -z "$CONTENT" ]; then
-  osascript -e 'display notification "Буфер обмена пуст" with title "Полигон: Журнал"'
+  osascript -e 'display notification "Буфер обмена пуст" with title "Лабораторный: Журнал"'
   exit 1
 fi
 
@@ -36,4 +38,4 @@ cat << DAILY_APPEND_EOF >> "$TARGET"
 $CONTENT
 DAILY_APPEND_EOF
 
-osascript -e "display notification \"Добавлено в журнал за $DATE_STR\" with title \"Полигон\""
+osascript -e "display notification \"Добавлено в журнал за $DATE_STR\" with title \"Лабораторный\""

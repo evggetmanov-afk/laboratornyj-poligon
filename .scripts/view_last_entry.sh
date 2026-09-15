@@ -1,8 +1,10 @@
 #!/bin/bash
+
 # @raycast.schemaVersion 1
-# @raycast.title Показать последнюю запись
+# @raycast.title [Лабораторный] Показать последнюю запись
 # @raycast.mode fullOutput
 # @raycast.packageName Лабораторный Полигон
+# @raycast.icon 🔬
 
 VAULT="/Users/getmanov/Лабораторный_полигон"
 LAST_INBOX=$(ls -t "$VAULT/Входящие"/*.md 2>/dev/null | head -n 1)

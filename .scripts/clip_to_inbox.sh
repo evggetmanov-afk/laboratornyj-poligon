@@ -1,8 +1,10 @@
 #!/bin/bash
+
 # @raycast.schemaVersion 1
-# @raycast.title Отправить во Входящие
+# @raycast.title [Лабораторный] Отправить во Входящие
 # @raycast.mode silent
 # @raycast.packageName Лабораторный Полигон
+# @raycast.icon 🔬
 
 VAULT="/Users/getmanov/Лабораторный_полигон"
 TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
@@ -10,7 +12,7 @@ TARGET="$VAULT/Входящие/Заметка_$TIMESTAMP.md"
 CONTENT=$(pbpaste)
 
 if [ -z "$CONTENT" ]; then
-  osascript -e 'display notification "Буфер обмена пуст" with title "Полигон: Входящие"'
+  osascript -e 'display notification "Буфер обмена пуст" with title "Лабораторный: Входящие"'
   exit 1
 fi
 
@@ -29,4 +31,4 @@ cat << INBOX_EOF > "$TARGET"
 $CONTENT
 INBOX_EOF
 
-osascript -e "display notification \"Сохранено во Входящие: Заметка_$TIMESTAMP.md\" with title \"Полигон\""
+osascript -e "display notification \"Сохранено во Входящие: Заметка_$TIMESTAMP.md\" with title \"Лабораторный\""
