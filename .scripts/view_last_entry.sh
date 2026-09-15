@@ -6,6 +6,9 @@
 # @raycast.packageName Лабораторный Полигон
 # @raycast.icon 🔬
 
+export LANG="ru_RU.UTF-8"
+export LC_ALL="ru_RU.UTF-8"
+
 VAULT="/Users/getmanov/Лабораторный_полигон"
 LAST_INBOX=$(ls -t "$VAULT/Входящие"/*.md 2>/dev/null | head -n 1)
 

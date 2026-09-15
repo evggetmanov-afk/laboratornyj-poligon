@@ -6,6 +6,9 @@
 # @raycast.packageName Лабораторный Полигон
 # @raycast.icon 🔬
 
+export LANG="ru_RU.UTF-8"
+export LC_ALL="ru_RU.UTF-8"
+
 VAULT="/Users/getmanov/Лабораторный_полигон"
 TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
 TARGET="$VAULT/Входящие/Заметка_$TIMESTAMP.md"
