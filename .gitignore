@@ -1,0 +1,15 @@
+# Служебные файлы macOS
+.DS_Store
+.Spotlight-V100
+.Trashes
+
+# Служебный кэш, состояние рабочей области и индексация Obsidian
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/cache/
+.obsidian/indexed*
+
+# Временные файлы редакторов и буферов
+*.tmp
+*.swp
+*~
