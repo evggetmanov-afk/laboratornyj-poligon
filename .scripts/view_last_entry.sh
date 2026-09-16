@@ -1,34 +1,29 @@
 #!/bin/bash
 
 # @raycast.schemaVersion 1
-# @raycast.title [Лабораторный] Показать последнюю запись
+# @raycast.title [Лаб] Показать последнюю запись журнала
 # @raycast.mode fullOutput
-# @raycast.packageName Лабораторный Полигон
-# @raycast.icon 🔬
+# @raycast.packageName Лабораторный полигон
+# @raycast.icon 👁️
 
 export LANG="ru_RU.UTF-8"
 export LC_ALL="ru_RU.UTF-8"
 
-VAULT="/Users/getmanov/Лабораторный_полигон"
-LAST_INBOX=$(ls -t "$VAULT/Входящие"/*.md 2>/dev/null | head -n 1)
+VAULT_DIR="/Users/getmanov/Лабораторный_полигон"
+JOURNAL_DIR="$VAULT_DIR/Вахтенный_журнал"
 
-echo "=== ПОСЛЕДНЯЯ ЗАМЕТКА ИЗ ВХОДЯЩИХ ==="
-if [ -n "$LAST_INBOX" ]; then
-  echo "Файл: $(basename "$LAST_INBOX")"
-  echo "----------------------------------------"
-  cat "$LAST_INBOX"
-else
-  echo "Входящие пусты."
+if [ ! -d "$JOURNAL_DIR" ]; then
+  echo "Каталог Вахтенный_журнал не найден."
+  exit 1
 fi
 
+LATEST_FILE=$(ls -t "$JOURNAL_DIR"/*.md 2>/dev/null | head -n 1)
+
+if [ -z "$LATEST_FILE" ]; then
+  echo "В вахтенном журнале пока нет записей."
+  exit 0
+fi
+
+echo "=== Файл: $(basename "$LATEST_FILE") ==="
 echo ""
-echo "=== ПОСЛЕДНИЙ БЛОК ВАХТЕННОГО ЖУРНАЛА ==="
-DATE_STR=$(date +"%Y-%m-%d")
-JOURNAL="$VAULT/Вахтенный_журнал/${DATE_STR}_Журнал.md"
-if [ -f "$JOURNAL" ]; then
-  tail -n 15 "$JOURNAL"
-else
-  echo "Журнал за сегодня еще не создан."
-fi
-
-afplay /System/Library/Sounds/Pop.aiff 2>/dev/null &
+cat "$LATEST_FILE"

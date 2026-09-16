@@ -1,39 +1,44 @@
 #!/bin/bash
 
 # @raycast.schemaVersion 1
-# @raycast.title [Лабораторный] Отправить во Входящие
+# @raycast.title [Лаб] Быстрая заметка во Входящие
 # @raycast.mode silent
-# @raycast.packageName Лабораторный Полигон
-# @raycast.icon 🔬
+# @raycast.packageName Лабораторный полигон
+# @raycast.icon 📥
 
 export LANG="ru_RU.UTF-8"
 export LC_ALL="ru_RU.UTF-8"
 
-VAULT="/Users/getmanov/Лабораторный_полигон"
-TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
-TARGET="$VAULT/Входящие/Заметка_$TIMESTAMP.md"
-CONTENT=$(pbpaste)
+VAULT_DIR="/Users/getmanov/Лабораторный_полигон"
+INBOX_DIR="$VAULT_DIR/Входящие"
+TIMESTAMP=$(date "+%Y-%m-%d_%H-%M-%S")
+TARGET="$INBOX_DIR/Заметка_$TIMESTAMP.md"
 
-if [ -z "$CONTENT" ]; then
-  afplay /System/Library/Sounds/Basso.aiff 2>/dev/null &
-  osascript -e 'display notification "Буфер обмена пуст" with title "Лабораторный: Входящие"'
+mkdir -p "$INBOX_DIR"
+
+CLIPBOARD_TEXT=$(pbpaste)
+
+if [ -z "$CLIPBOARD_TEXT" ]; then
+  afplay /System/Library/Sounds/Basso.aiff 2>/dev/null
+  osascript -e 'display notification "Буфер обмена пуст" with title "Лабораторный полигон"'
   exit 1
 fi
 
-cat << INBOX_EOF > "$TARGET"
+cat << NOTE > "$TARGET"
 ---
-дата: $(date +"%Y-%m-%d")
-тип: входящее
+id: $(date "+%Y%m%d%H%M")
+дата: $(date "+%Y-%m-%d")
+время: $(date "+%H:%M:%S")
+тип: входящие
 статус: сырое
-агент: человек
 теги:
-  - inbox
+  - входящие
 ---
 
-# Заметка $TIMESTAMP
+# Входящая заметка от $(date "+%Y-%m-%d %H:%M:%S")
 
-$CONTENT
-INBOX_EOF
+$CLIPBOARD_TEXT
+NOTE
 
-afplay /System/Library/Sounds/Pop.aiff 2>/dev/null &
-osascript -e "display notification \"Сохранено во Входящие: Заметка_$TIMESTAMP.md\" with title \"Лабораторный\""
+afplay /System/Library/Sounds/Glass.aiff 2>/dev/null
+osascript -e 'display notification "Заметка сохранена во Входящие" with title "Лабораторный полигон"'

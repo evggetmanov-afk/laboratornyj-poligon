@@ -1,20 +1,21 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-# Required parameters:
 # @raycast.schemaVersion 1
-# @raycast.title Заступить на вахту
+# @raycast.title [Лаб] Вахта (Передача контекста)
 # @raycast.mode silent
-
-# Optional parameters:
-# @raycast.icon ⚓️
-# @raycast.packageName Вахта
-
-# Documentation:
-# @raycast.description Сборка актуального контекста вахты в буфер обмена
-# @raycast.author Вахтенный помощник
+# @raycast.packageName Лабораторный полигон
+# @raycast.icon 📋
 
 export LANG="ru_RU.UTF-8"
 export LC_ALL="ru_RU.UTF-8"
 
-REPO_DIR="/Users/getmanov/Лабораторный_полигон"
-python3 "$REPO_DIR/.scripts/vahta.py"
+VAULT_DIR="/Users/getmanov/Лабораторный_полигон"
+SCRIPT_PATH="$VAULT_DIR/.scripts/vahta.py"
+
+if [ -f "$SCRIPT_PATH" ]; then
+  /usr/bin/env python3 "$SCRIPT_PATH"
+else
+  afplay /System/Library/Sounds/Basso.aiff 2>/dev/null
+  osascript -e 'display notification "Скрипт vahta.py не найден" with title "Лабораторный полигон"'
+  exit 1
+fi

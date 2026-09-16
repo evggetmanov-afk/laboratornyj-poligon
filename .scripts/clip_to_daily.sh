@@ -1,46 +1,54 @@
 #!/bin/bash
 
 # @raycast.schemaVersion 1
-# @raycast.title [Лабораторный] Добавить в Дневной журнал
+# @raycast.title [Лаб] Добавить в Ежедневник
 # @raycast.mode silent
-# @raycast.packageName Лабораторный Полигон
+# @raycast.packageName Лабораторный полигон
 # @raycast.icon 🔬
 
 export LANG="ru_RU.UTF-8"
 export LC_ALL="ru_RU.UTF-8"
 
-VAULT="/Users/getmanov/Лабораторный_полигон"
-DATE_STR=$(date +"%Y-%m-%d")
-TIME_STR=$(date +"%H:%M")
-TARGET="$VAULT/Вахтенный_журнал/${DATE_STR}_Журнал.md"
-CONTENT=$(pbpaste)
+VAULT_DIR="/Users/getmanov/Лабораторный_полигон"
+JOURNAL_DIR="$VAULT_DIR/Вахтенный_журнал"
+DATE_STR=$(date "+%Y-%m-%d")
+TIME_STR=$(date "+%H:%M:%S")
+TARGET="$JOURNAL_DIR/$DATE_STR.md"
 
-if [ -z "$CONTENT" ]; then
-  afplay /System/Library/Sounds/Basso.aiff 2>/dev/null &
-  osascript -e 'display notification "Буфер обмена пуст" with title "Лабораторный: Журнал"'
+mkdir -p "$JOURNAL_DIR"
+
+CLIPBOARD_TEXT=$(pbpaste)
+
+if [ -z "$CLIPBOARD_TEXT" ]; then
+  afplay /System/Library/Sounds/Basso.aiff 2>/dev/null
+  osascript -e 'display notification "Буфер обмена пуст" with title "Лабораторный полигон"'
   exit 1
 fi
 
 if [ ! -f "$TARGET" ]; then
-  cat << DAILY_INIT_EOF > "$TARGET"
+  cat << HEADER > "$TARGET"
 ---
+id: $(date "+%Y%m%d%H%M")
 дата: $DATE_STR
-тип: журнал
-статус: активный
+тип: вахтенный_журнал
+статус: в_работе
 теги:
   - вахтенный_журнал
 ---
 
 # Вахтенный журнал за $DATE_STR
 
-DAILY_INIT_EOF
+HEADER
 fi
 
-cat << DAILY_APPEND_EOF >> "$TARGET"
+cat << ENTRY >> "$TARGET"
 
-### [$TIME_STR] — Оперативная фиксация
-$CONTENT
-DAILY_APPEND_EOF
+## Запись [$TIME_STR]
 
-afplay /System/Library/Sounds/Pop.aiff 2>/dev/null &
-osascript -e "display notification \"Добавлено в журнал за $DATE_STR\" with title \"Лабораторный\""
+\`\`\`text
+$CLIPBOARD_TEXT
+\`\`\`
+ENTRY
+
+afplay /System/Library/Sounds/Glass.aiff 2>/dev/null
+osascript -e 'display notification "Запись успешно добавлена в журнал" with title "Лабораторный полигон"'
