@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+SWAP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+INDEX_FILE="$SWAP_DIR/INDEX.md"
+VAULT_FILE="$SWAP_DIR/docs/abc_vault.md"
+
+case "$1" in
+  list)
+    # Показать таблицу карточек из реестра
+    awk '/## 2. РЕЕСТР/,/## 3. БЫСТРЫЙ/' "$INDEX_FILE" | grep -E '^\|'
+    ;;
+  open)
+    # Открыть URL блокнота NotebookLM в браузере по умолчанию
+    URL=$(grep -m 1 "NotebookLM Vault:" "$INDEX_FILE" | awk '{print $3}')
+    if [[ "$URL" =~ ^https?:// ]]; then
+      open "$URL"
+      echo "Открываю блокнот: $URL"
+    else
+      echo "Ошибка: в $INDEX_FILE не указан валидный URL NotebookLM."
+    fi
+    ;;
+  copy)
+    # Скопировать блок карточки по ID в буфер обмена macOS
+    ID="$2"
+    if [ -z "$ID" ]; then
+      echo "Использование: ptr copy [ID] (например: ptr copy B4)"
+      exit 1
+    fi
+    awk -v id="[$ID]" '
+      $0 ~ "### " id {flag=1; print; next}
+      flag && /^### / {flag=0}
+      flag && /^---/ {flag=0}
+      flag {print}
+    ' "$VAULT_FILE" | pbcopy
+    echo "Карточка [$ID] скопирована в буфер обмена."
+    ;;
+  task)
+    # Показать текущий файл подкачки
+    cat "$SWAP_DIR/TASK.md"
+    ;;
+  *)
+    echo "Использование: .swap/bin/ptr {list|open|copy <ID>|task}"
+    echo "  list       - Вывести реестр атомов и адресов"
+    echo "  open       - Открыть связанный блокнот NotebookLM в браузере"
+    echo "  copy <ID>  - Скопировать карточку в буфер обмена (напр., ptr copy B4)"
+    echo "  task       - Вывести текущую задачу из файла подкачки"
+    ;;
+esac
