@@ -3,39 +3,67 @@
 SWAP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PROJECT_DIR="$(dirname "$SWAP_DIR")"
 
-echo "================================================="
-echo "      ЛАБОРАТОРНЫЙ ПОЛИГОН: ПУЛЬТ ОПЕРАТОРА      "
-echo "================================================="
-echo " 1) Показать текущую задачу (TASK)"
-echo " 2) Карта системы: реестр атомов (INDEX)"
-echo " 3) Памятка: Как думать (Ментальная модель)"
-echo " 4) Открыть базу знаний в NotebookLM"
-echo " 5) Собрать контекст вахты в буфер обмена"
-echo " 6) Зафиксировать всё в Git (Быстрый save)"
-echo " 0) Выход"
-echo "================================================="
+while true; do
+  clear
+  echo "================================================="
+  echo "      ЛАБОРАТОРНЫЙ ПОЛИГОН: ПУЛЬТ ОПЕРАТОРА      "
+  echo "================================================="
+  echo " 1) Показать текущую задачу (TASK)"
+  echo " 2) Карта системы: реестр атомов (INDEX)"
+  echo " 3) Памятка: Как думать (Ментальная модель)"
+  echo " 4) Открыть базу знаний в NotebookLM"
+  echo " 5) Собрать контекст вахты в буфер обмена"
+  echo " 6) Зафиксировать всё в Git (Быстрый save)"
+  echo " 0) Выход (или q)"
+  echo "================================================="
 
-read -p "Выберите действие [0-6]: " choice
+  read -p "Выберите действие [0-6]: " choice
 
-case $choice in
-  1)   1)   1)   1)   1)   1)   1)   1)   1)   1)   1)   1)   1)   1)   1)   1DIR/bin/ptr" guide ;;
-  4) "$SWAP_DIR/bin/ptr" open ;;
-  5) 
-     if [ -f "$PROJECT_DIR/.scripts/vahta.sh" ]; then
-         "$PROJECT_DIR/.scripts/vahta.sh"
-     elif [ -f "$PROJECT_DIR/.scripts/vahta.py" ]; then
-         python3 "$PROJECT_DIR/.scripts/vahta.py"
-     else
-         echo "Скрипт вахты не найден в .scripts/"
-     fi
-     ;;
-  6) 
-     cd "$PROJECT_DIR" || exit
-     git add .
-     git commit -m "chore: оперативная фиксация состояния"
-     git push
-     echo "✅ Состояние успешно сохранено на GitHub"
-     ;;
-  0) exit 0 ;;
-  *) echo "❌ Неверный выбор" ;;
-esac
+  case "$choice" in
+    1)
+      echo ""
+      "$SWAP_DIR/bin/ptr" task
+      ;;
+    2)
+      echo ""
+      "$SWAP_DIR/bin/ptr" list
+      ;;
+    3)
+      echo ""
+      "$SWAP_DIR/bin/ptr" guide
+      ;;
+    4)
+      echo ""
+      "$SWAP_DIR/bin/ptr" open
+      ;;
+    5)
+      echo ""
+      if [ -f "$PROJECT_DIR/.scripts/vahta.sh" ]; then
+          "$PROJECT_DIR/.scripts/vahta.sh"
+      elif [ -f "$PROJECT_DIR/.scripts/vahta.py" ]; then
+          python3 "$PROJECT_DIR/.scripts/vahta.py"
+      else
+          echo "Скрипт вахты не найден в .scripts/"
+      fi
+      ;;
+    6)
+      echo ""
+      cd "$PROJECT_DIR" || exit
+      git add .
+      git commit -m "chore: оперативная фиксация состояния"
+      git push
+      echo "✅ Состояние успешно сохранено на GitHub"
+      ;;
+    0|q|exit)
+      clear
+      exit 0
+      ;;
+    *)
+      echo ""
+      echo "❌ Неверный выбор"
+      ;;
+  esac
+
+  echo ""
+  read -p "Нажмите Enter для возврата в меню..." dummy
+done
