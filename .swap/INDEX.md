@@ -1,6 +1,7 @@
 # КЛЮЧ К СИСТЕМЕ (SYSTEM INDEX & REGISTRY)
 
 ## 1. ВНЕШНИЕ СВЯЗИ
+- Реестр скриптов: _system_spec/scripts_registry.md
 - NotebookLM Vault: https://notebooklm.google.com/
 - Git-репозиторий: laboratornyj-poligon (branch: main)
 - Локальная база карточек: .swap/docs/abc_vault.md

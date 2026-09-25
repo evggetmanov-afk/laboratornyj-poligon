@@ -8,16 +8,23 @@ while true; do
   echo "================================================="
   echo "      ЛАБОРАТОРНЫЙ ПОЛИГОН: ПУЛЬТ ОПЕРАТОРА      "
   echo "================================================="
-  echo " 1) Показать текущую задачу (TASK)"
-  echo " 2) Карта системы: реестр атомов (INDEX)"
-  echo " 3) Памятка: Как думать (Ментальная модель)"
+  echo " [ ОПЕРАТИВНЫЙ КОНТУР A-B-C ]"
+  echo " 1) Показать текущую задачу (.swap/TASK.md)"
+  echo " 2) Карта системы: реестр атомов (.swap/INDEX.md)"
+  echo " 3) Памятка мышления (Mental Model)"
   echo " 4) Открыть базу знаний в NotebookLM"
-  echo " 5) Собрать контекст вахты в буфер обмена"
-  echo " 6) Зафиксировать всё в Git (Быстрый save)"
+  echo ""
+  echo " [ СИСТЕМНЫЕ ОПЕРАЦИИ ]"
+  echo " 5) Собрать контекст вахты в буфер (vahta)"
+  echo " 6) Сбросить буфер обмена во Входящие (inbox)"
+  echo " 7) Показать последнюю запись журнала"
+  echo " 8) Проверить скрипты репозитория (validate)"
+  echo " 9) Зафиксировать всё в Git (Быстрый save)"
+  echo ""
   echo " 0) Выход (или q)"
   echo "================================================="
 
-  read -p "Выберите действие [0-6]: " choice
+  read -p "Выберите действие [0-9]: " choice
 
   case "$choice" in
     1)
@@ -42,11 +49,31 @@ while true; do
           "$PROJECT_DIR/.scripts/vahta.sh"
       elif [ -f "$PROJECT_DIR/.scripts/vahta.py" ]; then
           python3 "$PROJECT_DIR/.scripts/vahta.py"
-      else
-          echo "Скрипт вахты не найден в .scripts/"
       fi
       ;;
     6)
+      echo ""
+      if [ -f "$PROJECT_DIR/.scripts/clip_to_inbox.sh" ]; then
+          "$PROJECT_DIR/.scripts/clip_to_inbox.sh"
+      else
+          python3 "$PROJECT_DIR/.scripts/clip_to_inbox.py"
+      fi
+      ;;
+    7)
+      echo ""
+      if [ -f "$PROJECT_DIR/.scripts/view_last_entry.sh" ]; then
+          "$PROJECT_DIR/.scripts/view_last_entry.sh"
+      else
+          echo "Скрипт view_last_entry.sh не найден."
+      fi
+      ;;
+    8)
+      echo ""
+      if [ -f "$PROJECT_DIR/.scripts/validate_scripts.py" ]; then
+          python3 "$PROJECT_DIR/.scripts/validate_scripts.py"
+      fi
+      ;;
+    9)
       echo ""
       cd "$PROJECT_DIR" || exit
       git add .
