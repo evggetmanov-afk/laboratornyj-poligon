@@ -18,9 +18,7 @@ echo "================================================="
 read -p "Выберите действие [0-6]: " choice
 
 case $choice in
-  1) "$SWAP_DIR/bin/ptr" task ;;
-  2) "$SWAP_DIR/bin/ptr" list ;;
-  3) "$SWAP_DIR/bin/ptr" guide ;;
+  1)   1)   1)   1)   1)   1)   1)   1)   1)   1)   1)   1)   1)   1)   1)   1DIR/bin/ptr" guide ;;
   4) "$SWAP_DIR/bin/ptr" open ;;
   5) 
      if [ -f "$PROJECT_DIR/.scripts/vahta.sh" ]; then
