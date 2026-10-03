@@ -1,194 +1,180 @@
 #!/usr/bin/env python3
 import os
-import re
-import glob
-import subprocess
 import sys
+import subprocess
+import re
 
-REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CORE_TOOLS_DIR = os.path.join(REPO_ROOT, "00_core_tools")
-PROMPT_FILE = os.path.join(CORE_TOOLS_DIR, "prompts", "Системный_промпт_взаимодействия.md")
-JOURNAL_CORE_FILE = os.path.join(CORE_TOOLS_DIR, "JOURNAL_CORE.md")
-TASK_CORE_FILE = os.path.join(CORE_TOOLS_DIR, "TASK_CORE.md")
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+CORE_DIR = os.path.join(BASE_DIR, "00_core_tools")
+PROJECTS_DIR = os.path.join(BASE_DIR, "01_projects")
+DRAFT_DIR = os.path.join(BASE_DIR, "_draft")
+DRAFT_TASK = os.path.join(DRAFT_DIR, "TASK.md")
 
-PROJECTS_DIR = os.path.join(REPO_ROOT, "01_projects")
-DRAFT_DIR = os.path.join(REPO_ROOT, "_draft")
-DRAFT_TASK_FILE = os.path.join(DRAFT_DIR, "TASK.md")
+PROMPT_FILE = os.path.join(CORE_DIR, "SYSTEM_PROMPT.md")
+CORE_TASK = os.path.join(CORE_DIR, "TASK_CORE.md")
+CORE_JOURNAL = os.path.join(CORE_DIR, "JOURNAL_CORE.md")
 
+SOUND_EFFECT = "/System/Library/Sounds/Pop.aiff"
 
-def get_available_projects():
-    if not os.path.exists(PROJECTS_DIR):
-        os.makedirs(PROJECTS_DIR, exist_ok=True)
-        return []
-    items = sorted(os.listdir(PROJECTS_DIR))
-    projects = [item for item in items if os.path.isdir(os.path.join(PROJECTS_DIR, item)) and not item.startswith(".")]
-    return projects
+def play_sound():
+    if os.path.exists(SOUND_EFFECT):
+        subprocess.run(["afplay", SOUND_EFFECT], stderr=subprocess.DEVNULL)
 
+def copy_to_clipboard(text):
+    process = subprocess.Popen(["pbcopy"], stdin=subprocess.PIPE)
+    process.communicate(text.encode("utf-8"))
+    play_sound()
 
-def select_context(projects):
-    print("\n================ ВАХТА: ВЫБОР КОНТЕКСТА ================")
-    print("0) [ ⚙️ ЯДРО СИСТЕМЫ: 00_core_tools ]")
-    for idx, project in enumerate(projects, 1):
-        print(f"{idx}) {project}")
-    new_idx = len(projects) + 1
-    print(f"{new_idx}) [ + Создать новый проект ]")
-    print("--------------------------------------------------------")
+def read_file(path):
+    if os.path.exists(path):
+        with open(path, "r", encoding="utf-8") as f:
+            return f.read().strip()
+    return ""
 
-    choice = input(f"Выберите контекст [0-{new_idx}] (по умолчанию 0): ").strip()
-    if not choice:
-        choice = "0"
+def extract_last_entry(content):
+    if not content:
+        return ""
+    # Ищем разделы заголовков уровня ##
+    parts = re.split(r'(?m)(?=^##\s+)', content)
+    valid_parts = [p.strip() for p in parts if p.strip()]
+    if not valid_parts:
+        return content
+    # Если первый кусок - вводный заголовок # Журнал..., берем следующий
+    if len(valid_parts) > 1 and not valid_parts[0].startswith("##"):
+        return valid_parts[1]
+    return valid_parts[0]
 
-    if choice == "0":
-        return "__CORE__"
-
-    try:
-        choice_idx = int(choice)
-        if 1 <= choice_idx <= len(projects):
-            return projects[choice_idx - 1]
-        elif choice_idx == new_idx:
-            new_name = input("Введите имя нового проекта (например, tennis_blitz): ").strip()
-            new_name = re.sub(r'[^a-zA-Z0-9_\-а-яА-Я]', '_', new_name)
-            if not new_name:
-                print("Имя не может быть пустым. Отмена.")
-                sys.exit(1)
-            project_path = os.path.join(PROJECTS_DIR, new_name)
-            os.makedirs(os.path.join(project_path, "journal"), exist_ok=True)
-            os.makedirs(os.path.join(project_path, "tasks"), exist_ok=True)
+def detect_current_context():
+    if not os.path.exists(DRAFT_TASK):
+        return ("core", "00_core_tools", CORE_TASK, CORE_JOURNAL)
+    
+    content = read_file(DRAFT_TASK)
+    if "00_core_tools" in content or "Ядро" in content or "TASK_CORE" in content:
+        return ("core", "00_core_tools", CORE_TASK, CORE_JOURNAL)
+    
+    # Поиск имени проекта в заголовке
+    match = re.search(r'#\s+Контракт.*?:\s*([a-zA-Z0-9_\-]+)', content)
+    if match:
+        proj_name = match.group(1).strip()
+        proj_path = os.path.join(PROJECTS_DIR, proj_name)
+        if os.path.exists(proj_path):
+            t_path = os.path.join(proj_path, "TASK.md")
+            j_path = os.path.join(proj_path, "JOURNAL.md")
+            return ("project", proj_name, t_path, j_path)
             
-            init_task = f"# Контракт задачи проекта: {new_name}\n\n## Цель\n- Сформировать базовую постановку.\n"
-            with open(os.path.join(project_path, "tasks", "TASK.md"), "w", encoding="utf-8") as f:
-                f.write(init_task)
-            print(f"✅ Проект '{new_name}' успешно инициализирован.")
-            return new_name
-    except ValueError:
-        pass
+    # По умолчанию ядро
+    return ("core", "00_core_tools", CORE_TASK, CORE_JOURNAL)
 
-    print("Некорректный ввод. Выбран контекст ядра по умолчанию.")
-    return "__CORE__"
+def assemble_warm_handoff():
+    ctx_type, name, task_file, journal_file = detect_current_context()
+    sys_prompt = read_file(PROMPT_FILE)
+    active_task = read_file(DRAFT_TASK) or read_file(task_file)
+    journal_content = read_file(journal_file)
+    last_briefing = extract_last_entry(journal_content)
+    
+    package = []
+    if sys_prompt:
+        package.append(sys_prompt)
+        package.append("\n---\n")
+    
+    package.append(f"# Оперативный контекст передачи смены: {name}\n")
+    if active_task:
+        package.append("## Актуальный контракт задачи\n")
+        package.append(active_task)
+        package.append("\n---\n")
+        
+    if last_briefing:
+        package.append("## Последний зафиксированный брифинг из журнала\n")
+        package.append(last_briefing)
+        package.append("\n")
+        
+    final_text = "\n".join(package)
+    copy_to_clipboard(final_text)
+    print(f"\n[✓] Контекст '{name}' успешно собран (Warm Handoff) и скопирован в буфер!")
 
-
-def get_core_journal_entries():
-    if not os.path.exists(JOURNAL_CORE_FILE):
-        return "", 0
-
-    with open(JOURNAL_CORE_FILE, "r", encoding="utf-8") as f:
-        content = f.read()
-
-    sections = re.split(r'(?m)^(?=#{2,3}\s)', content)
-    header = sections[0] if sections and not sections[0].startswith('#') else ""
-    entries = [s for s in sections if s.startswith('#')]
-
-    tail_entries = entries[-3:] if len(entries) >= 3 else entries
-    result_text = header.strip() + "\n\n" + "".join(tail_entries).strip()
-    return result_text, len(entries)
-
-
-def get_latest_project_journal_entries(project_dir):
-    journal_dir = os.path.join(project_dir, "journal")
-    search_dirs = [journal_dir, project_dir]
-
-    files = []
-    for d in search_dirs:
-        if os.path.exists(d):
-            files.extend(glob.glob(os.path.join(d, "Журнал *.md")))
-            files.extend(glob.glob(os.path.join(d, "ВЕХА_*.md")))
-
-    journal_files = sorted(list(set(files)))
-    total_files = len(journal_files)
-
-    if not journal_files:
-        return "", total_files
-
-    latest_file = journal_files[-1]
-    with open(latest_file, "r", encoding="utf-8") as f:
-        content = f.read()
-
-    sections = re.split(r'(?m)^(?=#{2,3}\s)', content)
-    header = sections[0] if sections and not sections[0].startswith('#') else ""
-    entries = [s for s in sections if s.startswith('#')]
-
-    tail_entries = entries[-4:] if len(entries) >= 4 else entries
-    result_text = header.strip() + "\n\n" + "".join(tail_entries).strip()
-    return result_text, total_files
-
-
-def sync_core_task():
+def assemble_cold_context(ctx_type, name, task_file, journal_file):
+    sys_prompt = read_file(PROMPT_FILE)
+    task_text = read_file(task_file)
+    journal_text = read_file(journal_file)
+    
+    # Обновляем _draft/TASK.md
     os.makedirs(DRAFT_DIR, exist_ok=True)
-    task_content = ""
-    if os.path.exists(TASK_CORE_FILE):
-        with open(TASK_CORE_FILE, "r", encoding="utf-8") as f:
-            task_content = f.read().strip()
-
-    with open(DRAFT_TASK_FILE, "w", encoding="utf-8") as f:
-        f.write("# [АКТИВНЫЙ КОНТЕКСТ: ЯДРО СИСТЕМЫ (00_core_tools)]\n\n" + task_content)
-
-    return task_content
-
-
-def sync_project_task(project_name, project_dir):
-    os.makedirs(DRAFT_DIR, exist_ok=True)
-    project_task_file = os.path.join(project_dir, "tasks", "TASK.md")
-    if not os.path.exists(project_task_file):
-        root_task = os.path.join(project_dir, "TASK.md")
-        if os.path.exists(root_task):
-            project_task_file = root_task
-
-    task_content = ""
-    if os.path.exists(project_task_file):
-        with open(project_task_file, "r", encoding="utf-8") as f:
-            task_content = f.read().strip()
-
-    with open(DRAFT_TASK_FILE, "w", encoding="utf-8") as f:
-        f.write(f"# [АКТИВНЫЙ ПРОЕКТ: {project_name}]\n\n" + task_content)
-
-    return task_content
-
+    with open(DRAFT_TASK, "w", encoding="utf-8") as f:
+        f.write(task_text)
+        
+    package = []
+    if sys_prompt:
+        package.append(sys_prompt)
+        package.append("\n---\n")
+    package.append(f"# Контекст [{name}]\n")
+    if task_text:
+        package.append(task_text)
+        package.append("\n---\n")
+    if journal_text:
+        package.append(journal_text)
+        
+    final_text = "\n".join(package)
+    copy_to_clipboard(final_text)
+    print(f"\n[✓] Проект '{name}' активирован в _draft/TASK.md и скопирован в буфер!")
 
 def main():
-    projects = get_available_projects()
-    selected = select_context(projects)
+    # Проверка аргумента командной строки (например, 'вахта next')
+    if len(sys.argv) > 1 and sys.argv[1].lower() in ["next", "--next", "-n"]:
+        assemble_warm_handoff()
+        return
 
-    prompt_text = ""
-    if os.path.exists(PROMPT_FILE):
-        with open(PROMPT_FILE, "r", encoding="utf-8") as f:
-            prompt_text = f.read().strip()
-
-    if selected == "__CORE__":
-        context_name = "00_core_tools"
-        journal_text, total_records = get_core_journal_entries()
-        task_contract = sync_core_task()
-        reminders_block = ""
-        task_block = f"\n\n---\n\n# Оперативный контракт кванта (Ядро системы)\n\n{task_contract}" if task_contract else ""
-        cheat_sheet = """
----
-### 🧭 Памятка команд (Контекст ядра):
-* **«Делаем»** — применить предложенные изменения в ядре.
-* **«==»** — подтвердить выполнение команды.
-* **«Сдать смену ядра»** — сформировать запись в JOURNAL_CORE.md, зафиксировать коммит core(...) и пройти Remote Guard.
-"""
+    os.makedirs(PROJECTS_DIR, exist_ok=True)
+    os.makedirs(DRAFT_DIR, exist_ok=True)
+    
+    _, current_name, _, _ = detect_current_context()
+    
+    projects = [d for d in sorted(os.listdir(PROJECTS_DIR)) 
+                if os.path.isdir(os.path.join(PROJECTS_DIR, d)) and not d.startswith(".")]
+    
+    print("\n" + "="*58)
+    print("           🧭 ДИСПЕТЧЕР ВАХТЫ И ПЕРЕДАЧИ СМЕН")
+    print("="*58)
+    print(f" [Enter] 🔁 ПРОДОЛЖИТЬ ТЕКУЩИЙ: [{current_name}] (Warm Handoff)")
+    print("-" * 58)
+    print("  0) [ ⚙️ ЯДРО СИСТЕМЫ: 00_core_tools ]")
+    
+    for idx, p in enumerate(projects, start=1):
+        print(f"  {idx}) {p}")
+        
+    print("  +) [ ➕ Создать новый проект ]")
+    print("="*58)
+    
+    choice = input("\nВыберите действие [по умолчанию Enter]: ").strip()
+    
+    if choice == "":
+        assemble_warm_handoff()
+    elif choice == "0":
+        assemble_cold_context("core", "00_core_tools", CORE_TASK, CORE_JOURNAL)
+    elif choice == "+":
+        new_name = input("Введите имя нового проекта: ").strip()
+        if new_name:
+            p_path = os.path.join(PROJECTS_DIR, new_name)
+            os.makedirs(p_path, exist_ok=True)
+            t_file = os.path.join(p_path, "TASK.md")
+            j_file = os.path.join(p_path, "JOURNAL.md")
+            if not os.path.exists(t_file):
+                with open(t_file, "w", encoding="utf-8") as f:
+                    f.write(f"# Контракт проекта: {new_name}\n\n## Текущий квант\n- [ ] Инициализация проекта\n")
+            if not os.path.exists(j_file):
+                with open(j_file, "w", encoding="utf-8") as f:
+                    f.write(f"# Журнал проекта: {new_name}\n\n## [{new_name}] Старт проекта\n- Проект создан.\n")
+            assemble_cold_context("project", new_name, t_file, j_file)
     else:
-        context_name = selected
-        project_dir = os.path.join(PROJECTS_DIR, selected)
-        journal_text, total_records = get_latest_project_journal_entries(project_dir)
-        task_contract = sync_project_task(selected, project_dir)
-        reminders_block = f"\n\n---\n### 🔔 Напоминания проекта\n💡 В журнале проекта накопилось {total_records} файлов." if total_records > 7 else ""
-        task_block = f"\n\n---\n\n# Оперативный контракт кванта ({selected})\n\n{task_contract}" if task_contract else ""
-        cheat_sheet = """
----
-### 🧭 Памятка команд:
-* **«Делаем»** — применить предложенный код / команду в терминале.
-* **«==»** — подтвердить успешное выполнение без ошибок.
-* **«Сдать смену»** — сохранить в Git и зафиксировать прогресс вехи.
-"""
-
-    final_payload = f"{prompt_text}{task_block}\n\n---\n\n# Контекст [{context_name}]\n\n{journal_text}{reminders_block}{cheat_sheet}"
-
-    process = subprocess.Popen(['pbcopy'], stdin=subprocess.PIPE)
-    process.communicate(final_payload.encode('utf-8'))
-
-    os.system("afplay /System/Library/Sounds/Pop.aiff")
-    print(f"\n✅ Контекст вахты [{context_name}] собран в буфер обмена.")
-
+        try:
+            val = int(choice)
+            if 1 <= val <= len(projects):
+                target = projects[val - 1]
+                p_path = os.path.join(PROJECTS_DIR, target)
+                assemble_cold_context("project", target, os.path.join(p_path, "TASK.md"), os.path.join(p_path, "JOURNAL.md"))
+            else:
+                print("[!] Неверный номер проекта.")
+        except ValueError:
+            print("[!] Некорректный ввод.")
 
 if __name__ == "__main__":
     main()
