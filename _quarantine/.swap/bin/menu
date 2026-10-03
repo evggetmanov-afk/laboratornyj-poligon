@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+
+SWAP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PROJECT_DIR="$(dirname "$SWAP_DIR")"
+
+while true; do
+  clear
+  echo "================================================="
+  echo "      ЛАБОРАТОРНЫЙ ПОЛИГОН: ПУЛЬТ ОПЕРАТОРА      "
+  echo "================================================="
+  echo " [ ОПЕРАТИВНЫЙ КОНТУР A-B-C ]"
+  echo " 1) Показать текущую задачу (.swap/TASK.md)"
+  echo " 2) Карта системы: реестр атомов (.swap/INDEX.md)"
+  echo " 3) Памятка мышления (Mental Model)"
+  echo " 4) Открыть базу знаний в NotebookLM"
+  echo ""
+  echo " [ СИСТЕМНЫЕ ОПЕРАЦИИ ]"
+  echo " 5) Собрать контекст вахты в буфер (vahta)"
+  echo " 6) Сбросить буфер обмена во Входящие (inbox)"
+  echo " 7) Показать последнюю запись журнала"
+  echo " 8) Проверить скрипты репозитория (validate)"
+  echo " 9) Зафиксировать всё в Git (Быстрый save)"
+  echo ""
+  echo " 0) Выход (или q)"
+  echo "================================================="
+
+  read -p "Выберите действие [0-9]: " choice
+
+  case "$choice" in
+    1)
+      echo ""
+      "$SWAP_DIR/bin/ptr" task
+      ;;
+    2)
+      echo ""
+      "$SWAP_DIR/bin/ptr" list
+      ;;
+    3)
+      echo ""
+      "$SWAP_DIR/bin/ptr" guide
+      ;;
+    4)
+      echo ""
+      "$SWAP_DIR/bin/ptr" open
+      ;;
+    5)
+      echo ""
+      if [ -f "$PROJECT_DIR/.scripts/vahta.sh" ]; then
+          "$PROJECT_DIR/.scripts/vahta.sh"
+      elif [ -f "$PROJECT_DIR/.scripts/vahta.py" ]; then
+          python3 "$PROJECT_DIR/.scripts/vahta.py"
+      fi
+      ;;
+    6)
+      echo ""
+      if [ -f "$PROJECT_DIR/.scripts/clip_to_inbox.sh" ]; then
+          "$PROJECT_DIR/.scripts/clip_to_inbox.sh"
+      else
+          python3 "$PROJECT_DIR/.scripts/clip_to_inbox.py"
+      fi
+      ;;
+    7)
+      echo ""
+      if [ -f "$PROJECT_DIR/.scripts/view_last_entry.sh" ]; then
+          "$PROJECT_DIR/.scripts/view_last_entry.sh"
+      else
+          echo "Скрипт view_last_entry.sh не найден."
+      fi
+      ;;
+    8)
+      echo ""
+      if [ -f "$PROJECT_DIR/.scripts/validate_scripts.py" ]; then
+          python3 "$PROJECT_DIR/.scripts/validate_scripts.py"
+      fi
+      ;;
+    9)
+      echo ""
+      cd "$PROJECT_DIR" || exit
+      git add .
+      git commit -m "chore: оперативная фиксация состояния"
+      git push
+      echo "✅ Состояние успешно сохранено на GitHub"
+      ;;
+    0|q|exit)
+      clear
+      exit 0
+      ;;
+    *)
+      echo ""
+      echo "❌ Неверный выбор"
+      ;;
+  esac
+
+  echo ""
+  read -p "Нажмите Enter для возврата в меню..." dummy
+done

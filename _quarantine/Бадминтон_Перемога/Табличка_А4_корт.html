@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<title>БК Перемога — Табличка на корт</title>
+<style>
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: #FFFFFF;
+    color: #1A2421;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+  }
+  .sheet {
+    width: 210mm;
+    min-height: 297mm;
+    padding: 12mm 15mm;
+    background: #F8FAF8;
+    border: 1px solid #E2E8F0;
+  }
+  @media print {
+    body { padding: 0; background: none; }
+    .sheet { border: none; width: 100%; height: 100%; padding: 0; }
+  }
+  .header {
+    text-align: center;
+    background: #0F3D24;
+    color: #FFFFFF;
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 14px;
+  }
+  .badge {
+    display: inline-block;
+    background: #22C55E;
+    color: #062D17;
+    font-size: 13pt;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 4px 16px;
+    border-radius: 20px;
+    margin-bottom: 8px;
+  }
+  .title {
+    font-size: 28pt;
+    font-weight: 900;
+    margin-bottom: 6px;
+  }
+  .subtitle {
+    font-size: 14pt;
+    color: #DCFCE7;
+  }
+  .time-grid {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .time-col {
+    flex: 1;
+    background: #FFFFFF;
+    border: 2px solid #CBD5E1;
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+  }
+  .time-badge {
+    font-size: 20pt;
+    font-weight: 900;
+    color: #0F3D24;
+    margin-bottom: 4px;
+  }
+  .time-group {
+    font-size: 14pt;
+    font-weight: 800;
+    color: #15803D;
+    margin-bottom: 4px;
+  }
+  .time-desc {
+    font-size: 10.5pt;
+    color: #475569;
+    line-height: 1.3;
+  }
+  .free-banner {
+    background: #FEF3C7;
+    border: 2px dashed #D97706;
+    border-radius: 12px;
+    padding: 12px 16px;
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .free-title {
+    font-size: 15pt;
+    font-weight: 900;
+    color: #92400E;
+    margin-bottom: 4px;
+  }
+  .free-text {
+    font-size: 11.5pt;
+    color: #78350F;
+    font-weight: 600;
+  }
+  .qr-section {
+    background: #FFFFFF;
+    border: 2.5px solid #0F3D24;
+    border-radius: 14px;
+    padding: 16px;
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .qr-lead {
+    font-size: 16pt;
+    font-weight: 900;
+    color: #0F3D24;
+    margin-bottom: 4px;
+  }
+  .qr-sub {
+    font-size: 11pt;
+    color: #64748B;
+    margin-bottom: 10px;
+  }
+  .qr-box {
+    margin: 0 auto 10px auto;
+    display: inline-block;
+  }
+  .channel-pill {
+    display: inline-block;
+    background: #EFF6FF;
+    border: 1.5px solid #3B82F6;
+    color: #1D4ED8;
+    font-size: 15pt;
+    font-weight: 800;
+    padding: 5px 20px;
+    border-radius: 30px;
+  }
+  .footer-note {
+    text-align: center;
+    font-size: 11pt;
+    font-weight: 600;
+    color: #475569;
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <div class="header">
+    <div class="badge">Відкритий корт біля озера</div>
+    <h1 class="title">Бадмінтонний клуб «Перемога» 🏸</h1>
+    <p class="subtitle">Спорт, енергія та правильна техніка на свіжому повітрі щодня!</p>
+  </div>
+
+  <div class="time-grid">
+    <div class="time-col">
+      <div class="time-badge">19:00 – 21:00</div>
+      <div class="time-group">ДІТИ ТА ПІДЛІТКИ</div>
+      <div class="time-desc">Від початківців до спортивних груп. Центральний корт + станції відпрацювання техніки.</div>
+    </div>
+    <div class="time-col">
+      <div class="time-badge">21:00 – 00:00</div>
+      <div class="time-group">ДОРОСЛА ЛІГА</div>
+      <div class="time-desc">Вечірні спаринги, високий темп, відкриті матчі для гравців будь-якого рівня.</div>
+    </div>
+  </div>
+
+  <div class="free-banner">
+    <div class="free-title">ПРИНЦИП «ПРИХОДЬ І ГРАЙ»</div>
+    <div class="free-text">Професійні ракетки та тренувальні воланчики видаємо безкоштовно на місці! З вас — лише спортивне взуття.</div>
+  </div>
+
+  <div class="qr-section">
+    <div class="qr-lead">СКАНУЙТЕ ТА ДОЛУЧАЙТЕСЬ ДО КАНАЛУ</div>
+    <div class="qr-sub">Відео з тренувань • Статус готовності корта за погодою • Запис до тренерів</div>
+    <div class="qr-box">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=https%3A%2F%2Ft.me%2Fbadminton_peremoga&margin=1" width="220" height="220" alt="QR Code">
+    </div>
+    <div>
+      <div class="channel-pill">t.me/badminton_peremoga</div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    📍 Парк «Перемога», спортивний куточок біля озера • За підтримки тренерів клубу
+  </div>
+</div>
+</body>
+</html>
