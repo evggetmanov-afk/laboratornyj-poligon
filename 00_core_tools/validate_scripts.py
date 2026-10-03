@@ -10,7 +10,7 @@
 import os
 from pathlib import Path
 
-SCRIPTS_DIR = Path("/Users/getmanov/Лабораторный_полигон/.scripts")
+SCRIPTS_DIR = Path("/Users/getmanov/Лабораторный_полигон/00_core_tools")
 REQUIRED_FIELDS = ["@raycast.schemaVersion", "@raycast.title", "@raycast.mode", "@raycast.packageName", "@raycast.icon"]
 
 def validate():

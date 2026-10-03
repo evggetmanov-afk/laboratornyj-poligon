@@ -45,32 +45,32 @@ while true; do
       ;;
     5)
       echo ""
-      if [ -f "$PROJECT_DIR/.scripts/vahta.sh" ]; then
-          "$PROJECT_DIR/.scripts/vahta.sh"
-      elif [ -f "$PROJECT_DIR/.scripts/vahta.py" ]; then
-          python3 "$PROJECT_DIR/.scripts/vahta.py"
+      if [ -f "$PROJECT_DIR/00_core_tools/vahta.sh" ]; then
+          "$PROJECT_DIR/00_core_tools/vahta.sh"
+      elif [ -f "$PROJECT_DIR/00_core_tools/vahta.py" ]; then
+          python3 "$PROJECT_DIR/00_core_tools/vahta.py"
       fi
       ;;
     6)
       echo ""
-      if [ -f "$PROJECT_DIR/.scripts/clip_to_inbox.sh" ]; then
-          "$PROJECT_DIR/.scripts/clip_to_inbox.sh"
+      if [ -f "$PROJECT_DIR/00_core_tools/clip_to_inbox.sh" ]; then
+          "$PROJECT_DIR/00_core_tools/clip_to_inbox.sh"
       else
-          python3 "$PROJECT_DIR/.scripts/clip_to_inbox.py"
+          python3 "$PROJECT_DIR/00_core_tools/clip_to_inbox.py"
       fi
       ;;
     7)
       echo ""
-      if [ -f "$PROJECT_DIR/.scripts/view_last_entry.sh" ]; then
-          "$PROJECT_DIR/.scripts/view_last_entry.sh"
+      if [ -f "$PROJECT_DIR/00_core_tools/view_last_entry.sh" ]; then
+          "$PROJECT_DIR/00_core_tools/view_last_entry.sh"
       else
           echo "Скрипт view_last_entry.sh не найден."
       fi
       ;;
     8)
       echo ""
-      if [ -f "$PROJECT_DIR/.scripts/validate_scripts.py" ]; then
-          python3 "$PROJECT_DIR/.scripts/validate_scripts.py"
+      if [ -f "$PROJECT_DIR/00_core_tools/validate_scripts.py" ]; then
+          python3 "$PROJECT_DIR/00_core_tools/validate_scripts.py"
       fi
       ;;
     9)

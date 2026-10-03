@@ -10,7 +10,7 @@ export LANG="ru_RU.UTF-8"
 export LC_ALL="ru_RU.UTF-8"
 
 VAULT_DIR="/Users/getmanov/Лабораторный_полигон"
-SCRIPT_PATH="$VAULT_DIR/.scripts/vahta.py"
+SCRIPT_PATH="$VAULT_DIR/00_core_tools/vahta.py"
 
 if [ -f "$SCRIPT_PATH" ]; then
   /usr/bin/env python3 "$SCRIPT_PATH"
