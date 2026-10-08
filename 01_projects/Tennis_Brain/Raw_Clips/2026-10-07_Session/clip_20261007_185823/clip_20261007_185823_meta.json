@@ -1,0 +1,21 @@
+{
+  "clip_id": "clip_20261007_185823",
+  "source_video": "/Users/getmanov/Downloads/Karolina Pliskova vs. Coco Gauff | 2022 Berlin Quarterfinal | WTA Match Highlights.MP4",
+  "boundaries": {
+    "t_in": 3.84,
+    "t_out": 13.96,
+    "duration_sec": 10.12
+  },
+  "tags": [
+    "forehand",
+    "balance"
+  ],
+  "coach_audio_transcript": "",
+  "status": "READY_FOR_EXTRACTION",
+  "artifacts": {
+    "video": "/Users/getmanov/Лабораторный_полигон/01_projects/Tennis_Brain/Raw_Clips/2026-10-07_Session/clip_20261007_185823/clip_20261007_185823.mp4",
+    "audio": "/Users/getmanov/Лабораторный_полигон/01_projects/Tennis_Brain/Raw_Clips/2026-10-07_Session/clip_20261007_185823/clip_20261007_185823.wav",
+    "transcript": null,
+    "frames_dir": "/Users/getmanov/Лабораторный_полигон/01_projects/Tennis_Brain/Raw_Clips/2026-10-07_Session/clip_20261007_185823/frames"
+  }
+}

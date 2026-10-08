@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+SWAP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+INDEX_FILE="$SWAP_DIR/INDEX.md"
+VAULT_FILE="$SWAP_DIR/docs/abc_vault.md"
+
+case "$1" in
+  list)
+    awk '/## 2. РЕЕСТР/,/## 3. БЫСТРЫЙ/' "$INDEX_FILE" | grep -E '^\|'
+    ;;
+  guide|mind)
+    echo "================================================================="
+    echo "           МЕНТАЛЬНАЯ МОДЕЛЬ ОПЕРАТОРА (КАК ДУМАТЬ)"
+    echo "================================================================="
+    echo "1. РЕЖИМ СИНТЕЗА (NotebookLM):"
+    echo "   - Осмысление, работа с понятиями, стратегия."
+    echo "   - ЗАПРЕТ: здесь код не пишется."
+    echo ""
+    echo "2. РЕЖИМ ДИСПЕТЧЕРА (Терминал / ptr / Git):"
+    echo "   - Проверка реестра, навигация, коммиты."
+    echo "   - Вызов: ptr list / ptr task"
+    echo ""
+    echo "3. РЕЖИМ ИСПОЛНЕНИЯ (Одноразовый чат / CLI):"
+    echo "   - Выполнение контракта из .swap/TASK.md."
+    echo "   - Мозг отдыхает: оценка только по критерию приемки."
+    echo "================================================================="
+    ;;
+  open)
+    URL=$(grep -m 1 "NotebookLM Vault:" "$INDEX_FILE" | awk '{print $3}')
+    if [[ "$URL" =~ ^https?:// ]]; then
+      open "$URL"
+      echo "Открываю блокнот: $URL"
+    else
+      echo "Ошибка: в $INDEX_FILE не указан валидный URL NotebookLM."
+    fi
+    ;;
+  copy)
+    ID="$2"
+    if [ -z "$ID" ]; then
+      echo "Использование: ptr copy [ID] (например: ptr copy A4)"
+      exit 1
+    fi
+    awk -v id="[$ID]" '
+      $0 ~ "### " id {flag=1; print; next}
+      flag && /^### / {flag=0}
+      flag && /^---/ {flag=0}
+      flag {print}
+    ' "$VAULT_FILE" | pbcopy
+    echo "Карточка [$ID] скопирована в буфер обмена."
+    ;;
+  task)
+    cat "$SWAP_DIR/TASK.md"
+    ;;
+  *)
+    echo "Использование: .swap/bin/ptr {guide|list|open|copy <ID>|task}"
+    echo "  guide      - Ментальная модель оператора (как не перегружать мозг)"
+    echo "  list       - Вывести реестр атомов и адресов"
+    echo "  open       - Открыть блокнот NotebookLM в браузере"
+    echo "  copy <ID>  - Скопировать карточку в буфер (напр., ptr copy A4)"
+    echo "  task       - Показать текущую задачу из файла подкачки"
+    ;;
+esac
