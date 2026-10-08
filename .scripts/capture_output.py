@@ -1,83 +1,74 @@
-#!/usr/bin/python3
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
+"""Захват последнего штатного вывода терминала iTerm2 в буфер обмена."""
 
-# @raycast.schemaVersion 1
-# @raycast.title [Лаб] [Вахта] Захват вывода iTerm2 в буфер чата
-# @raycast.mode silent
-# @raycast.packageName Лабораторный полигон
-# @raycast.icon 📋
-
-import os
-import sys
 import subprocess
-import datetime
+import sys
 
-def play_sound(sound_name="Pop"):
-    sound_path = f"/System/Library/Sounds/{sound_name}.aiff"
-    if os.path.exists(sound_path):
-        subprocess.run(["afplay", sound_path], stderr=subprocess.DEVNULL)
 
-def get_iterm2_screen_text(lines_count: int = 45) -> str:
-    """Программно забирает текст текущего экрана iTerm2 через AppleScript."""
+def get_iterm_screen_contents() -> str:
+    """Считывает текстовое полотно активной сессии iTerm2 через AppleScript."""
     apple_script = """
     tell application "iTerm2"
-        if (count of windows) > 0 then
-            tell current session of current window
-                get text
-            end tell
-        else
+        if (count of windows) = 0 then
             return ""
         end if
+        tell current session of current window
+            return contents
+        end tell
     end tell
     """
-    try:
-        res = subprocess.run(
-            ["osascript", "-e", apple_script],
-            capture_output=True,
-            text=True,
-            check=True
-        )
-        full_text = res.stdout.strip()
-        if not full_text:
-            return ""
-        lines = [line.rstrip() for line in full_text.splitlines()]
-        tail_lines = lines[-lines_count:] if len(lines) > lines_count else lines
-        return "\n".join(tail_lines).strip()
-    except Exception as e:
-        try:
-            cb = subprocess.run(["pbpaste"], capture_output=True, text=True, check=True).stdout.strip()
-            if cb:
-                return f"[Fallback pbpaste]\n{cb}"
-        except Exception:
-            pass
-        return f"Ошибка чтения экрана iTerm2: {e}"
+    result = subprocess.run(
+        ["osascript", "-e", apple_script],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return result.stdout
 
-def set_clipboard(text: str):
-    subprocess.run(["pbcopy"], input=text, text=True, check=True)
+
+def copy_to_clipboard(text: str) -> None:
+    """Помещает сырой текст в системный буфер обмена macOS."""
+    process = subprocess.Popen(["pbcopy"], stdin=subprocess.PIPE, text=True)
+    process.communicate(input=text)
+
+
+def extract_last_output(raw_contents: str) -> str:
+    """Очищает экранный буфер от пустот и строки промпта, возвращая последний блок."""
+    lines = raw_contents.splitlines()
+
+    while lines and not lines[-1].strip():
+        lines.pop()
+
+    if not lines:
+        return ""
+
+    lines.pop()
+
+    while lines and not lines[-1].strip():
+        lines.pop()
+
+    if not lines:
+        return ""
+
+    collected_lines = []
+    for line in reversed(lines):
+        collected_lines.append(line)
+        if len(collected_lines) >= 100:
+            break
+
+    collected_lines.reverse()
+    return "\n".join(collected_lines).strip()
+
 
 def main():
-    timestamp = datetime.datetime.now().strftime("%H:%M:%S")
+    raw_text = get_iterm_screen_contents()
+    if not raw_text.strip():
+        sys.exit(0)
 
-    # 1. Считываем экран iTerm2
-    screen_content = get_iterm2_screen_text(lines_count=45)
-    if not screen_content:
-        screen_content = "Пустой экран iTerm2 на момент захвата."
+    clean_output = extract_last_output(raw_text)
+    if clean_output:
+        copy_to_clipboard(clean_output)
 
-    # 2. Формируем чистый блок для отчета в чат (без записи на диск)
-    chat_payload = (
-        f"📋 **Вывод терминала iTerm2 [{timestamp}]**\n\n"
-        f"```text\n"
-        f"{screen_content}\n"
-        f"```\n"
-    )
-
-    try:
-        set_clipboard(chat_payload)
-        play_sound("Pop")
-    except Exception as e:
-        play_sound("Basso")
-        sys.stderr.write(f"Ошибка обновления буфера обмена: {e}\n")
-        sys.exit(1)
 
 if __name__ == "__main__":
     main()
