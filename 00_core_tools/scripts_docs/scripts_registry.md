@@ -18,7 +18,7 @@
 ### Группа 2: Журналирование и входящие (.scripts/)
 | Утилита / Связка | Назначение | Способ вызова | Карточка паспорта |
 | :--- | :--- | :--- | :--- |
-| `clip_to_inbox.sh` ➔ `.py` | Сброс содержимого буфера в папку `Входящие/` | Пункт меню / CLI | `_system_spec/scripts/clip_to_inbox.md` |
+| `clip_to_inbox.sh` ➔ `.py` | Сброс содержимого буфера в папку `inbox/` | Пункт меню / CLI | `_system_spec/scripts/clip_to_inbox.md` |
 | `append_to_daily.sh` ➔ `.py` | Дозапись мысли или лога в суточный журнал | CLI / скрипт | `_system_spec/scripts/append_to_daily.md` |
 | `view_last_entry.sh` | Экспресс-просмотр последней записи журнала | Пункт меню / CLI | `_system_spec/scripts/view_last_entry.md` |
 

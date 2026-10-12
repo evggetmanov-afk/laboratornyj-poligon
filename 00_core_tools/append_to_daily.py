@@ -8,7 +8,7 @@ from datetime import datetime
 from pathlib import Path
 
 VAULT_DIR = Path(__file__).resolve().parent.parent
-TARGET_DIR = VAULT_DIR / "Входящие"
+TARGET_DIR = VAULT_DIR / "inbox"
 
 def play_sound(sound_name: str):
     sound_path = Path(f"/System/Library/Sounds/{sound_name}.aiff")

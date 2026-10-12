@@ -2,7 +2,7 @@
 
 # Required parameters:
 # @raycast.schemaVersion 1
-# @raycast.title [Лаб] Быстрая заметка во Входящие
+# @raycast.title [Лаб] Быстрая заметка в inbox
 # @raycast.mode silent
 
 # Optional parameters:

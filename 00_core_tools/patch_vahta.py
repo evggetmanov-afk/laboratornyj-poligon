@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import re
 
 vahta_file = "00_core_tools/vahta.py"
