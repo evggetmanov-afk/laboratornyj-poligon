@@ -1,71 +1,47 @@
-#!/usr/bin/env python3
-import os
 import subprocess
-import shutil
+from pathlib import Path
 
-# Автоматически определяем корень репозитория на уровень выше папки scripts
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-VAULT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
+# Автоматическое определение корня полигона из расположения скрипта (scripts/)
+SCRIPT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = SCRIPT_DIR.parent
 
-def run_cmd(cmd):
-    try:
-        res = subprocess.run(cmd, cwd=VAULT_ROOT, shell=True, capture_output=True, text=True, check=True)
-        return res.stdout.strip()
-    except subprocess.CalledProcessError as e:
-        return f"[ERROR: {e.stderr.strip()}]"
+def get_file_content(path: Path) -> str:
+    if path.exists():
+        return path.read_text(encoding="utf-8")
+    return f"[Файл не найден: {path.name}]"
 
-def build_handoff():
-    git_head = run_cmd("git log -n 1 --oneline")
-    git_status = run_cmd("git status -s")
-    if not git_status:
-        git_status = "[Чисто - незакоммиченных изменений нет]"
-
-    files = []
-    for root, _, filenames in os.walk(VAULT_ROOT):
-        if ".git" in root or "_quarantine" in root:
-            continue
-        for f in filenames:
-            if not f.startswith("."):
-                rel = os.path.relpath(os.path.join(root, f), VAULT_ROOT)
-                files.append(rel)
-    files.sort()
-    files_tree = "\n".join(f"- {f}" for f in files)
-
-    handoff_text = f"""# КВАНТ ПЕРЕДАЧИ ВАХТЫ (WARM HANDOFF)
-**Точка фиксации Git:** {git_head}
-
-## 1. Физическое состояние на диске (APFS)
-Статус изменений:
-{git_status}
-
-Файлы в репозитории:
-{files_tree}
-
----
-**Инструкция для LLM:** Контекст инициализирован объективным срезом файловой системы. Никаких домыслов. Жди задачу оператора."""
-
-    return handoff_text
-
-def copy_to_clipboard(text):
-    if shutil.which("pbcopy"):
-        proc = subprocess.Popen(["pbcopy"], stdin=subprocess.PIPE, text=True)
-        proc.communicate(input=text)
-        return True
-    return False
-
-def main():
-    print("=== [⚙️ УПРОЩЕННОЕ ЯДРО: ПЕРЕДАЧА ВАХТЫ] ===")
-    handoff_payload = build_handoff()
-    copied = copy_to_clipboard(handoff_payload)
+def build_vahta_packet():
+    # 1. Тонкий мета-контракт и поведенческий протокол (анти-сикофантия)
+    meta_contract = (
+        "SYSTEM CONTRACT & BEHAVIORAL PROTOCOL:\n"
+        "1. Работай строго по правилам, инвариантам и стандартам, описанным в папке methodology/.\n"
+        "2. Локальный репозиторий лабораторного полигона — единственный источник правды (SSOT).\n"
+        "3. КОММУНИКАТИВНЫЙ ФИЛЬТР:\n"
+        "   - Категорически запрещено хвалить пользователя, восхищаться его решениями или говорить, какой он гениальный.\n"
+        "   - Никаких попыток угождать, подстраиваться под мнение ради вежливости или сглаживать углы.\n"
+        "   - Стиль общения: слегка скептичный, прямой, аналитичный и ироничный. Если в архитектуре или логике есть дыра — указывай на нее сразу и жестко.\n\n"
+    )
     
-    print("\n----------------------------------------")
-    print(handoff_payload)
-    print("----------------------------------------")
+    # 2. Проектный паспорт
+    project_passport_path = ROOT_DIR / "PROJECT_PASSPORT.md"
+    project_passport = f"--- ПРОЕКТНЫЙ ПАСПОРТ ---\n{get_file_content(project_passport_path)}\n\n"
+
+    # 3. Реестр ролей
+    roles_path = ROOT_DIR / "ROLES_REGISTRY.md"
+    roles_passport = f"--- РЕЕСТР РОЛЕЙ ---\n{get_file_content(roles_path)}\n\n"
+
+    # 4. Последняя карточка вахтенного журнала из watch_log
+    journal_dir = ROOT_DIR / "watch_log"
+    journals = sorted(journal_dir.glob("Журнал *.md")) if journal_dir.exists() else []
+    latest_journal = journals[-1].read_text(encoding="utf-8") if journals else "Журналы в watch_log отсутствуют."
+    journal_block = f"--- АКТУАЛЬНЫЙ КОНТЕКСТ СМЕНЫ ---\n{latest_journal}"
+
+    # Сборка итогового пакета в буфер обмена
+    packet = f"{meta_contract}{project_passport}{roles_passport}{journal_block}"
     
-    if copied:
-        print("\n✅ Квант контекста скопирован в буфер обмена (Cmd + V)!")
-    else:
-        print("\n⚠️ pbcopy недоступен.")
+    process = subprocess.Popen('pbcopy', env={'LANG': 'en_US.UTF-8'}, stdin=subprocess.PIPE)
+    process.communicate(packet.encode('utf-8'))
+    print("Пакет вахты лабораторного полигона успешно собран и скопирован в буфер обмена.")
 
 if __name__ == "__main__":
-    main()
+    build_vahta_packet()
