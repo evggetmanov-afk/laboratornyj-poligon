@@ -15,7 +15,7 @@ author: operator
 # 📋 Реестр входящих требований
 
 - [x] [[01_Inbox/Baseline_Requirements/REQ-001|REQ-001: Назначение системы]] — обработано в [[02_Notes/CN-001_System_Purpose|CN-001]]
-- [ ] [[01_Inbox/Baseline_Requirements/REQ-002|REQ-002: Архитектура контуров (SSD vs Cloud)]]
+ - [x] [[01_Inbox/Baseline_Requirements/REQ-002|REQ-002: Архитектура контуров (SSD vs Cloud)]] — обработано в [[02_Notes/CN-002_Storage_Tiers|CN-002]]
 - [ ] [[01_Inbox/Baseline_Requirements/REQ-003|REQ-003: Квантованность тактов]]
 - [ ] [[01_Inbox/Baseline_Requirements/REQ-004|REQ-004: Изоляция репозиториев]]
 - [ ] [[01_Inbox/Baseline_Requirements/REQ-005|REQ-005: Режим инкубации]]
