@@ -12,42 +12,31 @@ tags:
   - requirements
 author: operator
 ---
+# 📋 Реестр входящих требований
 
-# Несгораемый реестр требований (Baseline Requirements Registry)
-
-Реестр фиксирует полный перечень 26 атомарных требований, составляющих исходный базис проектируемой системы «Диспетчер».
-
-> **Инвариант:** Карточки требований физически располагаются в директории `01_Inbox/Baseline_Requirements/` и никогда не перемещаются между папками. Статус меняется только внутри YAML-метаданных карточки и синхронно обновляется в таблице ниже.
-
----
-
-## Сводная таблица требований
-
-| ID | Название требования | Категория | План тактов | Факт тактов | Статус | Ссылка |
-|---|---|---|:---:|:---:|:---:|---|
-| REQ-001 | Базовое назначение и целевая роль системы | Core | 1 | 0 | inbox | [[REQ-001]] |
-| REQ-002 | Двухконтурный цикл управления | Process | 2 | 0 | inbox | [[REQ-002]] |
-| REQ-003 | Единый стандарт метаданных карточек | Schema | 1 | 0 | inbox | [[REQ-003]] |
-| REQ-004 | Неизменяемость путей и ссылочная целостность | Architecture | 1 | 0 | inbox | [[REQ-004]] |
-| REQ-005 | Ограничение числа тактов на сущность | Process | 1 | 0 | inbox | [[REQ-005]] |
-| REQ-006 | Буферная зона Staging для входящих данных | Ingest | 2 | 0 | inbox | [[REQ-006]] |
-| REQ-007 | Фиксация архитектурных решений через ADR | Architecture | 1 | 0 | inbox | [[REQ-007]] |
-| REQ-008 | Сессионный журнал вахт оператора | Operations | 1 | 0 | inbox | [[REQ-008]] |
-| REQ-009 | Вектор состояния STATE.md как точка входа | Core | 1 | 0 | inbox | [[REQ-009]] |
-| REQ-010 | Запрет прямых правок чистового слоя | Security | 1 | 0 | inbox | [[REQ-010]] |
-| REQ-011 | Очередь задач для агентного контура | Agents | 2 | 0 | inbox | [[REQ-011]] |
-| REQ-012 | Песочница черновиков агентов | Agents | 1 | 0 | inbox | [[REQ-012]] |
-| REQ-013 | Контрактный интерфейс агентных ролей | Agents | 2 | 0 | inbox | [[REQ-013]] |
-| REQ-014 | Словари разрешенной таксономии и тегов | Schema | 1 | 0 | inbox | [[REQ-014]] |
-| REQ-015 | Шаблонизация создания сущностей | Templates | 1 | 0 | inbox | [[REQ-015]] |
-| REQ-016 | Принцип квантования артефактов | Process | 1 | 0 | inbox | [[REQ-016]] |
-| REQ-017 | Верификация изменений через git diff | Security | 1 | 0 | inbox | [[REQ-017]] |
-| REQ-018 | Человек в контуре валидации (Human-in-the-Loop) | Governance | 1 | 0 | inbox | [[REQ-018]] |
-| REQ-019 | Запрет hardcode абсолютных путей | Architecture | 1 | 0 | inbox | [[REQ-019]] |
-| REQ-020 | Read-only доступ агентов к онтологии | Security | 1 | 0 | inbox | [[REQ-020]] |
-| REQ-021 | Протокол перехода Человек-Регламент-Агент | Governance | 1 | 0 | inbox | [[REQ-021]] |
-| REQ-022 | Интеграция с Dataview для оперативного среза | Core | 2 | 0 | inbox | [[REQ-022]] |
-| REQ-023 | Архитектурная изоляция станка и изделия | Architecture | 1 | 0 | inbox | [[REQ-023]] |
-| REQ-024 | Инкубационный режим внутри подпапки | Deployment | 1 | 0 | inbox | [[REQ-024]] |
-| REQ-025 | Процедура выпуска хранилища в отдельный репозиторий | Deployment | 2 | 0 | inbox | [[REQ-025]] |
-| REQ-026 | Разделение облачного накопителя и локального контура | Storage | 1 | 0 | inbox | [[REQ-026]] |
+- [x] [[01_Inbox/Baseline_Requirements/REQ-001|REQ-001: Назначение системы]] — обработано в [[02_Notes/CN-001_System_Purpose|CN-001]]
+- [ ] [[01_Inbox/Baseline_Requirements/REQ-002|REQ-002: Архитектура контуров (SSD vs Cloud)]]
+- [ ] [[01_Inbox/Baseline_Requirements/REQ-003|REQ-003: Квантованность тактов]]
+- [ ] [[01_Inbox/Baseline_Requirements/REQ-004|REQ-004: Изоляция репозиториев]]
+- [ ] [[01_Inbox/Baseline_Requirements/REQ-005|REQ-005: Режим инкубации]]
+- [ ] [[01_Inbox/Baseline_Requirements/REQ-006|REQ-006: Ролевая модель (Архитектор / Исполнитель)]]
+- [ ] [[01_Inbox/Baseline_Requirements/REQ-007|REQ-007: Структура каталогов хранилища]]
+- [ ] [[01_Inbox/Baseline_Requirements/REQ-008|REQ-008: Ядро метаданных (State & Manifest)]]
+- [ ] [[01_Inbox/Baseline_Requirements/REQ-009|REQ-009: Контролируемый словарь тегов]]
+- [ ] [[01_Inbox/Baseline_Requirements/REQ-010|REQ-010: Канонические шаблоны]]
+- [ ] [[01_Inbox/Baseline_Requirements/REQ-011|REQ-011: Журнал решений (ADR)]]
+- [ ] [[01_Inbox/Baseline_Requirements/REQ-012|REQ-012: Фиксация сессий]]
+- [ ] [[01_Inbox/Baseline_Requirements/REQ-013|REQ-013: Обработка ошибок (Инвариант)]]
+- [ ] [[01_Inbox/Baseline_Requirements/REQ-014|REQ-014: Валидация тегов]]
+- [ ] [[01_Inbox/Baseline_Requirements/REQ-015|REQ-015: Интеграция со скриптами]]
+- [ ] [[01_Inbox/Baseline_Requirements/REQ-016|REQ-016: Автоматизация тестов]]
+- [ ] [[01_Inbox/Baseline_Requirements/REQ-017|REQ-017: Правила именования файлов]]
+- [ ] [[01_Inbox/Baseline_Requirements/REQ-018|REQ-018: Ссылочная целостность]]
+- [ ] [[01_Inbox/Baseline_Requirements/REQ-019|REQ-019: Управление бэкапами]]
+- [ ] [[01_Inbox/Baseline_Requirements/REQ-020|REQ-020: Зеркалирование в холодный контур]]
+- [ ] [[01_Inbox/Baseline_Requirements/REQ-021|REQ-021: Протокол передачи контекста]]
+- [ ] [[01_Inbox/Baseline_Requirements/REQ-022|REQ-022: Оперативная витрина (Dashboard)]]
+- [ ] [[01_Inbox/Baseline_Requirements/REQ-023|REQ-023: Zsh и shell-интеграция]]
+- [ ] [[01_Inbox/Baseline_Requirements/REQ-024|REQ-024: Stream Deck интеграция]]
+- [ ] [[01_Inbox/Baseline_Requirements/REQ-025|REQ-025: Экспорт в NotebookLM]]
+- [ ] [[01_Inbox/Baseline_Requirements/REQ-026|REQ-026: Двухконтурная модель знаний]]
