@@ -16,7 +16,7 @@ author: operator
 
 - [x] [[01_Inbox/Baseline_Requirements/REQ-001|REQ-001: Назначение системы]] — обработано в [[02_Notes/CN-001_System_Purpose|CN-001]]
  - [x] [[01_Inbox/Baseline_Requirements/REQ-002|REQ-002: Архитектура контуров (SSD vs Cloud)]] — обработано в [[02_Notes/CN-002_Storage_Tiers|CN-002]]
-- [ ] [[01_Inbox/Baseline_Requirements/REQ-003|REQ-003: Квантованность тактов]]
+- [x] [[01_Inbox/Baseline_Requirements/REQ-003|REQ-003: Квантованность тактов]] — обработано в [[02_Notes/CN-003_Quantum_Tacts|CN-003]]
 - [ ] [[01_Inbox/Baseline_Requirements/REQ-004|REQ-004: Изоляция репозиториев]]
 - [ ] [[01_Inbox/Baseline_Requirements/REQ-005|REQ-005: Режим инкубации]]
 - [ ] [[01_Inbox/Baseline_Requirements/REQ-006|REQ-006: Ролевая модель (Архитектор / Исполнитель)]]
