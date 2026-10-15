@@ -1,21 +1,19 @@
-# КВАНТ РАБОТЫ: Синхронизация scripts/raw_to_inbox.py со спецификацией именования
+# КВАНТ РАБОТЫ: Боевой тест scripts/raw_to_inbox.py и проверка коллизий
 
 ## 1. СКОУП
-- Изменять: .swap/TASK.md, scripts/raw_to_inbox.py
-- Только чтение: specs/file_naming_convention_spec.md, specs/inbox_gateway_spec.md
+- Изменять: 00_raw_inbox/, 01_inbox/, .swap/TASK.md
+- Только чтение: scripts/raw_to_inbox.py, specs/file_naming_convention_spec.md
 
 ## 2. КОНТРАКТ
-- Привести генерацию ID и имен файлов в scripts/raw_to_inbox.py к стандарту:
-  1. Формат штампа времени: YYYY_MM_DD_HHmmss.
-  2. Формирование имени файла: <timestamp_id>[_<collision_index>][tags] <semantic_title>.md.
-  3. Если имя исходного файла уже содержит штамп YYYY_MM_DD_HHmmss, использовать его; если нет — генерировать новый штамп и подставлять семантическое имя исходного файла.
-  4. При обнаружении коллизии в целевой папке инкрементировать суффикс (_001, _002) и синхронно обновлять поле id в YAML frontmatter.
-  5. Обеспечить код возврата 0 при успешном переносе и сохранение режима FIFO / --all.
+1. Поместить тестовый файл в 00_raw_inbox/ без YAML frontmatter.
+2. Прогнать `python3 scripts/raw_to_inbox.py`.
+3. Убедиться, что файл перемещен в 01_inbox/, имя соответствует `YYYYMMDDHHmmss[tags] <title>.md`, а поле `id` в YAML строго совпадает со штампом.
+4. Провести тест коллизии: создать файл с тем же базовым штампом, запустить шлюз, проверить появление суффикса `_001` в имени и синхронно в поле `id`.
 
 ## 3. КРИТЕРИЙ ПРИЕМКИ (Definition of Done)
-- Синтаксическая валидность: python3 -m py_compile scripts/raw_to_inbox.py
-- Проверка справки: python3 scripts/raw_to_inbox.py --help && echo "OK"
-- Ожидаемый результат: OK
+- Файлы обработаны и перемещены в 01_inbox/.
+- `id` во frontmatter == штамп в имени файла (включая индекс коллизии).
+- Код возврата `python3 scripts/raw_to_inbox.py` равен 0.
 
 ## 4. СТАТУС
 - DONE
