@@ -1,17 +1,16 @@
-# КВАНТ РАБОТЫ: Автоматический коммит служебных файлов при закрытии смены в vahta.py
+# КВАНТ РАБОТЫ: Разработка спецификации процедуры ревизии журналов вахт
 
 ## 1. СКОУП
-- Изменять: scripts/vahta.py
-- Только чтение: specs/terminal_heredoc_standard.md
+- Изменять: specs/revision_procedure_spec.md, .swap/TASK.md
+- Только чтение: PROJECT_PASSPORT.md, scripts/vahta.py
 
 ## 2. КОНТРАКТ
-- Добавить в функцию `close_shift()` скрипта `scripts/vahta.py` автоматическую фиксацию созданных файлов журнала (`new_journal_path`) и архива задачи (`archived_task_path`) через Git (`git add` и `git commit`).
-- Сообщение коммита формировать по шаблону: `chore(watch_log): close watch session {date_str}_{next_num:02d}`.
-- Выводить в консоль понятный статус фиксации коммита, чтобы гарантировать чистоту рабочего дерева (`working tree clean`).
+- Разработать инженерную спецификацию specs/revision_procedure_spec.md.
+- Зафиксировать: триггеры, шаги порционного разбора watch_log, фильтр извлечения артефактов (ADR/ABC, реестры, правила), изоляцию разобранного в watch_log/archive, отрицательные ограничения.
 
-## 3. КРИТЕРИЙ ПРИЕМКИ (Definition of Done)
-- Команда проверки: python3 -m py_compile scripts/vahta.py && git diff scripts/vahta.py
-- Ожидаемый результат: Синтаксическая корректность скрипта (код 0) и наличие логики коммита в `close_shift()`.
+## 3. КРИТЕРИЙ ПРИЕМКИ
+- Команда проверки: test -f specs/revision_procedure_spec.md
+- Ожидаемый результат: Файл существует и содержит разделы регламента
 
 ## 4. СТАТУС
-- DONE
+- IN_PROGRESS
