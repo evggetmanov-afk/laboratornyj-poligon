@@ -13,3 +13,27 @@
 - **Путь:** `scripts/apply_payload.py`
 - **Вызов:** `python3 scripts/apply_payload.py` (читает `.swap/TASK.md`) или `python3 scripts/apply_payload.py <путь_к_файлу>`.
 - **Грабли и ограничения:** Не принимает ввод через пайп (`stdin`). Работает только через промежуточный файл задачи.
+
+## 3. save_clip.py
+- **Назначение:** Запись содержимого буфера обмена macOS в целевой файл по маркеру `### FILE: <путь>` (стандарт Clipboard Stream).
+- **Путь:** `scripts/save_clip.py` (системный алиас `save`).
+- **Вызов:** `save` (или `python3 scripts/save_clip.py`).
+- **Грабли и ограничения:** Требует точного маркера пути в первой строке буфера; исключает использование `cat << 'EOF'` и `Cmd+V` в терминал.
+
+## 4. drop_clip.py
+- **Назначение:** Автоматический быстрый сброс текстового содержимого буфера macOS в файл входящего накопителя.
+- **Путь:** `scripts/drop_clip.py`
+- **Вызов:** `python3 scripts/drop_clip.py`
+- **Логика и маска:** Создает `00_raw_inbox/YYYY_MM_DD_HHmmss_raw.md`. Автоматически внедряет YAML frontmatter с `id` и `created`. При коллизиях добавляет суффикс `_001`, `_002`.
+
+## 5. raw_to_inbox.py
+- **Назначение:** Подача заготовок из `00_raw_inbox/` в `01_inbox/` с нормализацией ID и имен по спецификации.
+- **Путь:** `scripts/raw_to_inbox.py`
+- **Вызов:** `python3 scripts/raw_to_inbox.py` (режим FIFO) или `python3 scripts/raw_to_inbox.py --all`.
+- **Логика:** Приводит сущности к формату `<timestamp_id>[tags] <semantic_title>.md`, выставляет `stage: inbox`, разрешает коллизии суффиксами `_001`.
+
+## 6. inbox_dispatcher.py
+- **Назначение:** Диспетчеризация и нормализация сущностей из `01_inbox/` в целевые каталоги (`ready/`, `projects/`, `docs/`, `_quarantine/`).
+- **Путь:** `scripts/inbox_dispatcher.py`
+- **Вызов:** `python3 scripts/inbox_dispatcher.py`
+- **Грабли и ограничения:** Требует совпадения таймстемпа в имени файла и `id` в YAML; обновляет поле `stage` (`ready`, `project`, `quarantine`).
