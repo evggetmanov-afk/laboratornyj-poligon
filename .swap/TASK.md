@@ -1,8 +1,8 @@
-# КВАНТ РАБОТЫ: Реализация и сквозное тестирование scripts/inbox_dispatcher.py
+# КВАНТ РАБОТЫ: Разработка диспетчера входящих (scripts/inbox_dispatcher.py)
 
 ## 1. СКОУП
-- Изменять: scripts/inbox_dispatcher.py, 01_inbox/, ready/, projects/, .swap/TASK.md
-- Только чтение: specs/inbox_dispatch_spec.md, specs/file_naming_convention_spec.md
+- Изменять: scripts/inbox_dispatcher.py, .swap/TASK.md
+- Только чтение: specs/inbox_dispatch_spec.md, 01_inbox/, ready/, _quarantine/
 
 ## 2. КОНТРАКТ
 1. Написать утилиту scripts/inbox_dispatcher.py согласно утвержденной specs/inbox_dispatch_spec.md:
@@ -19,4 +19,4 @@
 - Код возврата 0.
 
 ## 4. СТАТУС
-- PENDING
+- DONE

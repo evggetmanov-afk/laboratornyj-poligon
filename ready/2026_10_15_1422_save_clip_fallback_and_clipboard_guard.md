@@ -3,8 +3,8 @@ id: inbox_2026_10_15_1422
 created: 2026-10-15 14:22
 type: bugfix_and_feat
 status: UNPROCESSED
+stage: ready
 ---
-
 # Улучшение save_clip.py: дефолтный сброс и сохранение буфера
 
 ## Проблема

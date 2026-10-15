@@ -3,8 +3,8 @@ id: inbox_2026_10_15_1420
 created: 2026-10-15 14:20
 type: proposal
 status: UNPROCESSED
+stage: ready
 ---
-
 # Топология номерных шлюзов: от сырого шума к исполнению
 
 ## Суть предложения

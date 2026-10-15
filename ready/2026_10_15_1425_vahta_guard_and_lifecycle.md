@@ -3,8 +3,8 @@ id: inbox_2026_10_15_1425
 created: 2026-10-15 14:25
 type: architecture
 status: UNPROCESSED
+stage: ready
 ---
-
 # Рациональное зерно вахты и блокировка пустых закрытий
 
 ## Суть механизма
