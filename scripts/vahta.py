@@ -154,6 +154,7 @@ def close_shift():
     with open(new_journal_path, "w", encoding="utf-8") as f:
         f.write(journal_entry)
 
+    archived_task_path = None
     if task_content:
         archived_task_name = f"task_{date_str}_{next_num:02d}.md"
         archived_task_path = os.path.join(SWAP_ARCHIVE_DIR, archived_task_name)
@@ -166,12 +167,28 @@ def close_shift():
         with open(TASK_FILE, "w", encoding="utf-8") as f:
             f.write("# ТЕКУЩИЙ КОНТРАКТ ЗАДАЧИ\n\n## 1. ЦЕЛЬ\n- \n\n## 2. ШАГИ\n- [ ] \n")
 
+    files_to_commit = [new_journal_path]
+    if archived_task_path and os.path.exists(archived_task_path):
+        files_to_commit.append(archived_task_path)
+
+    subprocess.run(["git", "add"] + files_to_commit, cwd=REPO_ROOT, check=False)
+    commit_msg = f"chore(watch_log): close watch session {date_str}_{next_num:02d}"
+    commit_res = subprocess.run(["git", "commit", "-m", commit_msg], cwd=REPO_ROOT, capture_output=True, text=True)
+
     play_sound("Glass.aiff")
     print(f"✅ [CLOSE] Смена успешно закрыта.")
     print(f"📝 Журнал сохранен: {os.path.relpath(new_journal_path, REPO_ROOT)}")
+    if archived_task_path:
+        print(f"📦 Контракт архивирован: {os.path.relpath(archived_task_path, REPO_ROOT)}")
     print(f"🛡️  Каталог .swap/ сохранен, TASK.md сброшен к исходному шаблону.")
+
+    if commit_res.returncode == 0:
+        print(f"🔒 Зафиксирован коммит: {commit_msg}")
+    else:
+        print(f"ℹ️  Git commit: {commit_res.stdout.strip() or commit_res.stderr.strip()}")
+
     print("\nСтатус Git:")
-    subprocess.run(["git", "status", "-s"])
+    subprocess.run(["git", "status", "-s"], cwd=REPO_ROOT)
 
 
 def main():
