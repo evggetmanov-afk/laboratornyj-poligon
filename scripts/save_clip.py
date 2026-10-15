@@ -1,59 +1,107 @@
-#/usr/bin/env python3 -m trace --trace /Users/getmanov/Лабораторный_полигон/.scripts/vahta.py python3
-import sys
-import os
-import subprocess
-import re
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
-def get_clipboard():
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Сохранить буфер в файл (save)
+# @raycast.mode silent
+
+# Optional parameters:
+# @raycast.icon 💾
+# @raycast.packageName Лабораторный полигон
+
+import os
+import re
+import sys
+import subprocess
+from pathlib import Path
+
+VAULT_DIR = Path(__file__).resolve().parent.parent
+
+def play_sound(sound_name: str):
+    sound_path = Path(f"/System/Library/Sounds/{sound_name}.aiff")
+    if sound_path.exists():
+        subprocess.run(["afplay", str(sound_path)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+def notify(title: str, message: str):
+    script = f'display notification "{message}" with title "{title}"'
+    subprocess.run(["osascript", "-e", script], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+def get_clipboard() -> str:
     try:
-        res = subprocess.run(['pbpaste'], capture_output=True, text=True, check=True)
+        res = subprocess.run(["pbpaste"], capture_output=True, text=True, check=True)
         return res.stdout
     except Exception as e:
-        print(f'❌ Ошибка чтения буфера обмена через pbpaste: {e}', file=sys.stderr)
+        play_sound("Sosumi")
+        notify("Лабораторный полигон", f"Ошибка pbpaste: {e}")
+        print(f"❌ Ошибка чтения буфера обмена: {e}", file=sys.stderr)
         sys.exit(1)
+
+def set_clipboard(text: str):
+    try:
+        proc = subprocess.Popen(["pbcopy"], stdin=subprocess.PIPE, text=True)
+        proc.communicate(input=text)
+    except Exception as e:
+        print(f"⚠️ Ошибка записи в буфер: {e}", file=sys.stderr)
 
 def main():
     text = get_clipboard()
     if not text.strip():
-        print('⚠️  Буфер обмена пуст.', file=sys.stderr)
+        play_sound("Basso")
+        notify("Лабораторный полигон", "Буфер обмена пуст")
+        print("⚠️ Буфер обмена пуст.", file=sys.stderr)
         sys.exit(1)
 
-    target_path = None
+    target_path_raw = None
     content_to_write = text
 
-    # Если путь передан аргументом: save path/to/file
     if len(sys.argv) > 1:
-        target_path = sys.argv[1]
+        target_path_raw = sys.argv[1]
     else:
-        # Ищем маркер в первых строках: ### FILE: <path> или <<<FILE_PATH: <path>
         lines = text.splitlines(keepends=True)
         for i in range(min(5, len(lines))):
             line = lines[i].strip()
             m = re.match(r'^(?:### FILE:|<<<FILE_PATH:)\s*([^\s]+)', line)
             if m:
-                target_path = m.group(1)
-                content_to_write = ''.join(lines[i+1:])
-                # Отрезаем закрывающий маркер, если есть
+                target_path_raw = m.group(1)
+                content_to_write = "".join(lines[i+1:])
                 content_to_write = re.sub(r'<<<FILE_CONTENT_END>>>\s*$', '', content_to_write)
                 break
 
-    if not target_path:
+    if not target_path_raw:
+        play_sound("Basso")
+        notify("Лабораторный полигон", "Маркер пути не найден (### FILE: <путь>)")
         print('❌ Путь не определен. Укажи аргумент: save <путь> или добавь в начало буфера "### FILE: <путь>"', file=sys.stderr)
         sys.exit(1)
 
-    # Нормализуем путь и создаем директории
-    target_path = os.path.normpath(target_path)
-    parent_dir = os.path.dirname(target_path)
-    if parent_dir:
-        os.makedirs(parent_dir, exist_ok=True)
+    path_obj = Path(target_path_raw)
+    if not path_obj.is_absolute():
+        final_path = (VAULT_DIR / path_obj).resolve()
+    else:
+        final_path = path_obj.resolve()
 
     try:
-        with open(target_path, 'w', encoding='utf-8') as f:
-            f.write(content_to_write)
-        print(f'✅ [SAVE] Записано на диск: {target_path} ({len(content_to_write)} симв.)')
+        final_path.parent.mkdir(parents=True, exist_ok=True)
+        final_path.write_text(content_to_write, encoding="utf-8")
+        play_sound("Tink")
     except Exception as e:
-        print(f'❌ Ошибка записи в {target_path}: {e}', file=sys.stderr)
+        play_sound("Sosumi")
+        notify("Лабораторный полигон", f"Ошибка диска: {e}")
+        print(f"❌ Ошибка записи в {final_path}: {e}", file=sys.stderr)
         sys.exit(1)
 
-if __name__ == '__main__':
+    rel_path_str = str(final_path)
+    try:
+        rel_path_str = str(final_path.relative_to(VAULT_DIR))
+    except ValueError:
+        pass
+
+    report = f"✅ [SAVE] Записано на диск: {rel_path_str} ({len(content_to_write)} симв.)"
+    print(report)
+
+    set_clipboard(report)
+    play_sound("Glass")
+    notify("Лабораторный полигон", f"Записано: {rel_path_str} | Отчет в буфере")
+
+if __name__ == "__main__":
     main()
