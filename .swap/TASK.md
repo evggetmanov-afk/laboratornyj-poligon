@@ -1,19 +1,22 @@
-# КВАНТ РАБОТЫ: Спецификация диспетчеризации инбокса (inbox_dispatch_spec)
+# КВАНТ РАБОТЫ: Реализация и сквозное тестирование scripts/inbox_dispatcher.py
 
 ## 1. СКОУП
-- Изменять: specs/inbox_dispatch_spec.md, .swap/TASK.md
-- Только чтение: specs/file_naming_convention_spec.md, PROJECT_PASSPORT.md
+- Изменять: scripts/inbox_dispatcher.py, 01_inbox/, ready/, projects/, .swap/TASK.md
+- Только чтение: specs/inbox_dispatch_spec.md, specs/file_naming_convention_spec.md
 
 ## 2. КОНТРАКТ
-1. Спроектировать спецификацию маршрутизации заметок из 01_inbox/ в целевые каталоги (ready/, projects/<name>/, docs/).
-2. Зафиксировать правила маппинга тегов [домен] и полей frontmatter на целевые каталоги.
-3. Закрепить правила обновления поля stage (inbox -> ready / done) при строгом сохранении неизменности имени файла и поля id.
-4. Описать протокол обработки ошибок, отсутствия тегов назначения и изоляции в _quarantine/.
+1. Написать утилиту scripts/inbox_dispatcher.py согласно утвержденной specs/inbox_dispatch_spec.md:
+   - Парсинг тегов в имени файла [ценность][тип][домен] и полей frontmatter.
+   - Маршрутизация: в projects/<project_name>/, в docs/ или по умолчанию в ready/.
+   - Защита инварианта: сохранение неизменности имени файла и поля id (YYYYMMDDHHmmss).
+   - Обновление поля stage во frontmatter (inbox -> ready / project).
+   - Изоляция поврежденных файлов в _quarantine/.
+2. Провести тестовый прогон на файлах из 01_inbox/.
 
 ## 3. КРИТЕРИЙ ПРИЕМКИ (Definition of Done)
-- Файл specs/inbox_dispatch_spec.md создан на диске через save.
-- Спецификация полностью согласуется с инвариантами specs/file_naming_convention_spec.md.
-- Статус в .swap/TASK.md переведен в DONE.
+- python3 -m py_compile scripts/inbox_dispatcher.py выполняется без ошибок.
+- Тестовая заметка из 01_inbox/ перемещена в целевой каталог с сохранением имени и id, поле stage обновлено на ready/project.
+- Код возврата 0.
 
 ## 4. СТАТУС
-- DONE
+- PENDING
