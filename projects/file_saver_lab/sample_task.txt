@@ -1,0 +1,18 @@
+Здесь может быть любой сопроводительный текст задачи от архитектора или модели.
+Скрипт найдет только блоки маркеров.
+
+<<<FILE_PATH: projects/file_saver_lab/demo/hello.py
+def say_hello():
+    print("Привет из распаковщика apply_payload.py!")
+
+if __name__ == "__main__":
+    say_hello()
+<<<FILE_CONTENT_END>>>
+
+<<<FILE_PATH: projects/file_saver_lab/demo/config/app.json
+{
+  "project": "demo_run",
+  "status": "ready",
+  "items_count": 42
+}
+<<<FILE_CONTENT_END>>>
