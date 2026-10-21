@@ -1,24 +1,29 @@
-# КВАНТ РАБОТЫ: Создание CLI-ревизора семантического слоя (scripts/lexicon_cli.py)
+# КВАНТ РАБОТЫ: Мастер графических блок-схем (Mermaid Master)
 
 ## 1. СКОУП
 - Изменять:
-  - `scripts/lexicon_cli.py`
-  - `scripts/scan_lexicon.sh`
   - `.swap/TASK.md`
+  - `specs/mermaid_master_spec.md`
+  - `ROLES_REGISTRY.md`
 - Только чтение:
-  - `docs/decisions/ADR-004_Lexicon_and_Thesaurus_Engine.md`
-  - `docs/thesaurus/`
+  - `00_raw_inbox/Архитектор производственных схем (Mermaid Architect).md`
+  - `00_raw_inbox/Мастер-контур Базовая архитектура.md`
+  - `00_raw_inbox/Мастер-контур Полная расширенная архитектура.md`
+  - `00_raw_inbox/print-landscape.css`
+  - `PROJECT_PASSPORT.md`
 
 ## 2. КОНТРАКТ
-1. Создать исполняемый скрипт `scripts/lexicon_cli.py` с правами на исполнение (`chmod +x`).
-2. Обеспечить парсинг утвержденных карточек `docs/thesaurus/LEX-*.md`.
-3. Поддержать режим сканирования Markdown-файлов на прямые термины, синонимы (`aliases`) и неразрешенные ссылки `[[...]]`.
-4. Поддержать флаг `--dump-llm` для генерации среза онтологии.
-5. Создать обертку быстрого вызова `scripts/scan_lexicon.sh` с поддержкой Raycast и аргументов.
+1. Проанализировать исходные требования к схемам из `00_raw_inbox/`.
+2. Спроектировать спецификацию `specs/mermaid_master_spec.md`:
+   - Поддерживаемые типы схем (flowchart, sequence, state, class).
+   - Правила стилизации и темы печати (интеграция `print-landscape.css`).
+   - Синтаксические инварианты (направление потоков, экранирование узлов, запрет циклических дедлоков).
+3. Зарегистрировать интерфейсную роль `/схема` в `ROLES_REGISTRY.md`.
+4. Предусмотреть формат выгрузки схем через стандарт Clipboard Stream.
 
 ## 3. КРИТЕРИЙ ПРИЕМКИ (Definition of Done)
 - Команда проверки:
-  `test -x scripts/scan_lexicon.sh && bash scripts/scan_lexicon.sh docs/decisions/ADR-004_Lexicon_and_Thesaurus_Engine.md > /dev/null && echo "OK"`
+  `test -f specs/mermaid_master_spec.md && grep -q "/схема" ROLES_REGISTRY.md && echo "OK"`
 - Ожидаемый результат: `OK`
 
 ## 4. СТАТУС
