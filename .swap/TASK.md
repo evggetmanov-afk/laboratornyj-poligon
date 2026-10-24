@@ -1,18 +1,16 @@
-# КВАНТ РАБОТЫ: Ввод в строй браузерного шлюза (CONTAINER) и утилиты container_gateway.py
+# КВАНТ РАБОТЫ: Фиксация ADR-005 и регламента двухконтурного мастера
 
 ## 1. СКОУП
-- Изменять: docs/decisions/ADR-004_Browser_Gateway_Payload.md, docs/manuals/browser_gateway_manual.md, scripts/container_gateway.py
-- Только чтение: PROJECT_PASSPORT.md, scripts/apply_payload.py
+- Изменять: docs/decisions/ADR-005_Two_Contour_Dialog_Master.md, docs/manuals/two_contour_master_manual.md, .swap/TASK.md
+- Только чтение: PROJECT_PASSPORT.md
 
 ## 2. КОНТРАКТ
-1. Сформировать архитектурное решение ADR-004 по формату ABC с протоколом CONTAINER.
-2. Сформировать пошаговую инструкцию оператора в docs/manuals/browser_gateway_manual.md.
-3. Разработать независимый распаковщик scripts/container_gateway.py с трехфазной транзакционностью (All-or-Nothing).
-4. Провести верификацию блока через позитивный и негативный тесты в _draft/.
+1. Зафиксировать архитектурное решение ADR-005 по формату ABC.
+2. Подготовить регламент оператора двухконтурного мастера.
 
 ## 3. КРИТЕРИЙ ПРИЕМКИ (Definition of Done)
 - Команда проверки:
-  test -f docs/decisions/ADR-004_Browser_Gateway_Payload.md && test -f docs/manuals/browser_gateway_manual.md && test -f scripts/container_gateway.py && echo "OK"
+  test -f docs/decisions/ADR-005_Two_Contour_Dialog_Master.md && test -f docs/manuals/two_contour_master_manual.md && echo "OK"
 - Ожидаемый результат: OK
 
 ## 4. СТАТУС
