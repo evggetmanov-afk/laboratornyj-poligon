@@ -1,17 +1,17 @@
-# КВАНТ РАБОТЫ: Создание блока стратегий (strategy_engine)
+# КВАНТ РАБОТЫ: Развертывание проекта tennis_tactics
 
 ## 1. СКОУП
-- Изменять: projects/strategy_engine/specs/spec.md, projects/strategy_engine/src/runner.py, projects/strategy_engine/tasks/test_strat.md
-- Только чтение: docs/decisions/, PROJECT_PASSPORT.md
+- Изменять: projects/tennis_tactics/specs/protocol_spec.md, projects/tennis_tactics/cards/gameplan_template.md, projects/tennis_tactics/cards/trigger_pressure_serve.md
+- Только чтение: docs/archive/raw_inbox/, PROJECT_PASSPORT.md
 
 ## 2. КОНТРАКТ
-- Развернут Контур С: детерминированный раннер runner.py с поддержкой синтаксиса CMD:.
-- Зафиксирована спецификация блока в specs/spec.md.
-- Проведен сквозной физический тест на tasks/test_strat.md (код возврата 0).
+- Создана спецификация тактического протокола specs/protocol_spec.md (модель 4 фаз и принцип ABC).
+- Создан шаблон матчевого плана cards/gameplan_template.md.
+- Создана первая карточка триггера cards/trigger_pressure_serve.md.
 
 ## 3. КРИТЕРИЙ ПРИЕМКИ (Definition of Done)
-- Команда проверки: python3 projects/strategy_engine/src/runner.py projects/strategy_engine/tasks/test_strat.md
-- Ожидаемый результат: STATUS: DONE, код возврата 0. Выполнено.
+- Команда проверки: test -f projects/tennis_tactics/cards/gameplan_template.md && test -f projects/tennis_tactics/cards/trigger_pressure_serve.md && echo "OK"
+- Ожидаемый результат: вывод "OK", код возврата 0. Выполнено.
 
 ## 4. СТАТУС
 - DONE
