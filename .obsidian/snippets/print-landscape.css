@@ -1,0 +1,20 @@
+/* Принудительная альбомная ориентация для заметок с cssclass: landscape */
+@media print {
+  @page {
+    size: A4 landscape !important;
+    margin: 8mm 10mm !important;
+  }
+  
+  body.landscape,
+  .markdown-rendered.landscape {
+    width: 100% !important;
+  }
+
+  .landscape .mermaid,
+  .landscape svg {
+    max-width: 100% !important;
+    width: 100% !important;
+    height: auto !important;
+    page-break-inside: avoid !important;
+  }
+}
