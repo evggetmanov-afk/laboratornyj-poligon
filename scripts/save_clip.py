@@ -1,15 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Required parameters:
-# @raycast.schemaVersion 1
-# @raycast.title Сохранить буфер в файл (save)
-# @raycast.mode silent
-
-# Optional parameters:
-# @raycast.icon 💾
-# @raycast.packageName Лабораторный полигон
-
 import os
 import re
 import sys
@@ -36,13 +27,6 @@ def get_clipboard() -> str:
         notify("Лабораторный полигон", f"Ошибка pbpaste: {e}")
         print(f"❌ Ошибка чтения буфера обмена: {e}", file=sys.stderr)
         sys.exit(1)
-
-def set_clipboard(text: str):
-    try:
-        proc = subprocess.Popen(["pbcopy"], stdin=subprocess.PIPE, text=True)
-        proc.communicate(input=text)
-    except Exception as e:
-        print(f"⚠️ Ошибка записи в буфер: {e}", file=sys.stderr)
 
 def main():
     text = get_clipboard()
@@ -98,10 +82,8 @@ def main():
 
     report = f"✅ [SAVE] Записано на диск: {rel_path_str} ({len(content_to_write)} симв.)"
     print(report)
-
-    set_clipboard(report)
     play_sound("Glass")
-    notify("Лабораторный полигон", f"Записано: {rel_path_str} | Отчет в буфере")
+    notify("Лабораторный полигон", f"Записано: {rel_path_str}")
 
 if __name__ == "__main__":
     main()
