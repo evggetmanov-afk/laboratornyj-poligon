@@ -11,7 +11,7 @@ id: 202610081320
   - slicer
   - telemetry
 ---
-
+  
 # Спецификация инструмента: Frame Telemetry & Video Clip Slicer
 
 ## 1. Слой A: Замысел и назначение
