@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+"""
+scripts/save_clip.py
+Утилита сохранения содержимого буфера обмена на диск.
+Поддерживает безаргументный запуск: парсит путь из первой строки `### FILE: <путь>`.
+"""
+
 import os
 import re
 import sys
@@ -9,14 +15,25 @@ from pathlib import Path
 
 VAULT_DIR = Path(__file__).resolve().parent.parent
 
+
 def play_sound(sound_name: str):
     sound_path = Path(f"/System/Library/Sounds/{sound_name}.aiff")
     if sound_path.exists():
-        subprocess.run(["afplay", str(sound_path)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(
+            ["afplay", str(sound_path)],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+
 
 def notify(title: str, message: str):
     script = f'display notification "{message}" with title "{title}"'
-    subprocess.run(["osascript", "-e", script], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    subprocess.run(
+        ["osascript", "-e", script],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+
 
 def get_clipboard() -> str:
     try:
@@ -27,6 +44,7 @@ def get_clipboard() -> str:
         notify("Лабораторный полигон", f"Ошибка pbpaste: {e}")
         print(f"❌ Ошибка чтения буфера обмена: {e}", file=sys.stderr)
         sys.exit(1)
+
 
 def main():
     text = get_clipboard()
@@ -39,7 +57,10 @@ def main():
     target_path_raw = None
     content_to_write = text
 
+    # Если передан аргумент — выдаем строгое предупреждение о нарушении протокола
     if len(sys.argv) > 1:
+        print("⚠️ ВНИМАНИЕ: Передача пути аргументом нарушает протокол бесшовного вызова save!")
+        print("⚠️ Стандартный вызов: скопировать блок с '### FILE: <путь>' и вызвать 'save' без аргументов.")
         target_path_raw = sys.argv[1]
     else:
         lines = text.splitlines(keepends=True)
@@ -48,14 +69,19 @@ def main():
             m = re.match(r'^(?:### FILE:|<<<FILE_PATH:)\s*([^\s]+)', line)
             if m:
                 target_path_raw = m.group(1)
-                content_to_write = "".join(lines[i+1:])
-                content_to_write = re.sub(r'<<<FILE_CONTENT_END>>>\s*$', '', content_to_write)
+                content_to_write = "".join(lines[i + 1 :])
+                content_to_write = re.sub(
+                    r"<<<FILE_CONTENT_END>>>\s*$", "", content_to_write
+                )
                 break
 
     if not target_path_raw:
         play_sound("Basso")
         notify("Лабораторный полигон", "Маркер пути не найден (### FILE: <путь>)")
-        print('❌ Путь не определен. Укажи аргумент: save <путь> или добавь в начало буфера "### FILE: <путь>"', file=sys.stderr)
+        print(
+            '❌ Путь не определен. Добавь в начало буфера строку: "### FILE: <относительный_путь>" и вызови save',
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     path_obj = Path(target_path_raw)
@@ -84,6 +110,7 @@ def main():
     print(report)
     play_sound("Glass")
     notify("Лабораторный полигон", f"Записано: {rel_path_str}")
+
 
 if __name__ == "__main__":
     main()

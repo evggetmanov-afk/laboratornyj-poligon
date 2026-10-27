@@ -29,7 +29,7 @@ def parse_frontmatter(file_path: Path) -> dict:
     }
     try:
         content = file_path.read_text(encoding="utf-8")
-    except Exception as e:
+    except Exception:
         return meta
 
     if not content.startswith("---"):
@@ -44,42 +44,38 @@ def parse_frontmatter(file_path: Path) -> dict:
     in_presentation = False
 
     for line in fm_lines:
-        raw_line = line
-        stripped = line.strip()
-
-        if not stripped or stripped.startswith("#"):
+        line_stripped = line.strip()
+        if not line_stripped or line_stripped.startswith("#"):
             continue
 
-        if stripped == "aliases:":
+        if line_stripped.startswith("aliases:"):
             in_aliases = True
             in_presentation = False
             continue
-        elif stripped == "presentation_mapping:":
-            in_presentation = True
+        elif line_stripped.startswith("presentation_mapping:"):
             in_aliases = False
+            in_presentation = True
             continue
-        elif re.match(r"^[a-zA-Z_0-9]+:", stripped):
+        elif not line.startswith(" ") and not line.startswith("\t"):
             in_aliases = False
             in_presentation = False
 
-        if in_aliases:
-            if stripped.startswith("- "):
-                val = stripped[2:].strip().strip('"').strip("'")
-                if val:
-                    meta["aliases"].append(val)
+        if in_aliases and line_stripped.startswith("-"):
+            alias = line_stripped.lstrip("-").strip().strip('"').strip("'")
+            if alias:
+                meta["aliases"].append(alias)
             continue
 
-        if in_presentation:
-            if stripped.startswith("client_label:"):
-                val = stripped.split("client_label:", 1)[1].strip().strip('"').strip("'")
-                meta["client_label"] = val
+        if in_presentation and line_stripped.startswith("client_label:"):
+            val = line_stripped.split(":", 1)[1].strip().strip('"').strip("'")
+            meta["client_label"] = val
             continue
 
-        if ":" in stripped:
-            k, v = stripped.split(":", 1)
+        if ":" in line_stripped and not in_aliases and not in_presentation:
+            k, v = line_stripped.split(":", 1)
             k = k.strip()
             v = v.strip().strip('"').strip("'")
-            if k in meta:
+            if k in meta and k != "aliases":
                 meta[k] = v
 
     return meta
@@ -92,7 +88,7 @@ def load_lexicon_index() -> list:
         return index
 
     for p in THESAURUS_DIR.glob("*.md"):
-        if p.name in ("TEMPLATE.md", "thesaurus.md"):
+        if p.name.lower() in ("template.md", "thesaurus.md"):
             continue
         meta = parse_frontmatter(p)
         if meta.get("term"):
@@ -129,55 +125,48 @@ def scan_document(doc_path: Path, index: list):
     found_aliases = []
 
     for item in index:
-        t = item["term"]
-        if t and t.lower() in content_lower:
+        term = item["term"]
+        pattern_term = r"(?<!\w)" + re.escape(term.lower()) + r"(?!\w)"
+        if re.search(pattern_term, content_lower):
             found_terms.append(item)
-            continue
 
-        matched_alias = None
-        for a in item["aliases"]:
-            if a.lower() in content_lower:
-                matched_alias = a
-                break
-        if matched_alias:
-            found_aliases.append((item, matched_alias))
+        for alias in item["aliases"]:
+            pattern_alias = r"(?<!\w)" + re.escape(alias.lower()) + r"(?!\w)"
+            if re.search(pattern_alias, content_lower):
+                found_aliases.append((alias, item))
 
-    wiki_links = set(re.findall(r"\[\[(.*?)\]\]", content))
-    unresolved_candidates = []
-
-    known_keys = set()
+    wiki_links = re.findall(r"\[\[(.*?)\]\]", content)
+    known_terms = {item["term"].lower() for item in index}
     for item in index:
-        if item["term"]:
-            known_keys.add(item["term"].lower())
         for a in item["aliases"]:
-            known_keys.add(a.lower())
+            known_terms.add(a.lower())
 
+    unknown_candidates = []
     for link in wiki_links:
-        clean_target = link.split("|")[0].strip()
-        clean_name = clean_target.split("/")[-1].replace(".md", "").strip().lower()
-        if clean_name not in known_keys and not any(item["id"].lower() == clean_name for item in index):
-            unresolved_candidates.append(clean_target)
+        clean_link = link.split("|")[0].strip()
+        if clean_link.lower() not in known_terms:
+            unknown_candidates.append(clean_link)
 
-    print(f"\n📋 [РЕВИЗИЯ СЕМАНТИКИ] Файл: {doc_path.relative_to(REPO_ROOT) if doc_path.is_relative_to(REPO_ROOT) else doc_path}")
+    print(f"\n📋 [РЕВИЗИЯ СЕМАНТИКИ] Файл: {doc_path.relative_to(REPO_ROOT) if doc_path.is_relative_to(REPO_ROOT) else doc_path.name}")
     print("=" * 64)
 
     print(f"\n1. Точные термины ядра ({len(found_terms)}):")
     if found_terms:
-        for it in found_terms:
-            print(f"   ✓ [{it['id']}] {it['term']} (домен: {it['domain']})")
+        for t in found_terms:
+            print(f"   ✓ [{t['id']}] {t['term']} (домен: {t['domain']})")
     else:
-        print("   — Прямых вхождений канонических терминов не обнаружено.")
+        print("   — Точных вхождений не обнаружено.")
 
     print(f"\n2. Обнаруженные синонимы/жаргонизмы ({len(found_aliases)}):")
     if found_aliases:
-        for it, alias in found_aliases:
-            print(f"   ➜ Найдено: «{alias}» → Канонический узел: [{it['id']}] {it['term']}")
+        for alias, t in found_aliases:
+            print(f"   ➜ Найдено: «{alias}» → Канонический узел: [{t['id']}] {t['term']}")
     else:
-        print("   — Альтернативных формулировок не обнаружено.")
+        print("   — Синонимов или жаргонизмов не обнаружено.")
 
-    print(f"\n3. Кандидаты на регистрацию (новые [[ссылки]]) ({len(unresolved_candidates)}):")
-    if unresolved_candidates:
-        for c in sorted(unresolved_candidates):
+    print(f"\n3. Кандидаты на регистрацию (новые [[ссылки]]) ({len(unknown_candidates)}):")
+    if unknown_candidates:
+        for c in set(unknown_candidates):
             print(f"   ? [[{c}]] (нет в docs/thesaurus/)")
     else:
         print("   — Все ссылки согласованы с тезаурусом.")
@@ -187,18 +176,17 @@ def scan_document(doc_path: Path, index: list):
 
 def main():
     if len(sys.argv) < 2:
-        print("Использование:\n  python3 scripts/lexicon_cli.py <путь_к_документу.md>\n  python3 scripts/lexicon_cli.py --dump-llm")
+        print("Использование: python3 scripts/lexicon_cli.py <документ.md> | --dump-llm")
         sys.exit(1)
 
-    arg = sys.argv[1]
     index = load_lexicon_index()
 
+    arg = sys.argv[1]
     if arg == "--dump-llm":
         dump_for_llm(index)
-        return
-
-    target_file = Path(arg).resolve()
-    scan_document(target_file, index)
+    else:
+        doc_path = (REPO_ROOT / arg).resolve()
+        scan_document(doc_path, index)
 
 
 if __name__ == "__main__":

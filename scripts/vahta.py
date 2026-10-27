@@ -1,157 +1,133 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 """
-Скрипт управления сменами (вахтой) Лабораторного полигона.
-Управляет шлюзом .swap/, архивирует контракты в watch_log/,
-собирает контекст в системный буфер (pbcopy) и фиксирует коммиты в Git.
+scripts/vahta.py
+Утилита управления рабочими сменами (вахтами), состоянием задачи
+и автоматической фиксацией контекста в буфер обмена и Git.
 """
 
 import os
-import sys
-import glob
-import shutil
 import subprocess
+import sys
 from datetime import datetime
+from pathlib import Path
 
-ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-PROMPT_FILE = os.path.join(ROOT_DIR, "project_passport.md")
-JOURNAL_DIR = os.path.join(ROOT_DIR, "watch_log")
-SWAP_DIR = os.path.join(ROOT_DIR, ".swap")
-TASK_FILE = os.path.join(SWAP_DIR, "task.md")
-TASK_TEMPLATE = os.path.join(SWAP_DIR, "task_template.md")
+BASE_DIR = Path(__file__).resolve().parent.parent
+SWAP_DIR = BASE_DIR / ".swap"
+TASK_FILE = SWAP_DIR / "task.md"
 
-REMINDER_TEXT = """---
-### 🧭 Триггеры управления:
-- **«Думай»** — архитектура, риски, формулирование контракта (Read-Only).
-- **«Делай»** — диспетчеризация конвейера, атомарные шаги Zsh, запись .swap/task.md.
-- **«Пиши код»** / **«Генерируй файл»** — санкция на генерацию монолита под утилиту save.
-- **«Сдать смену»** — регламент консервации и фиксации вахты в Git.
-"""
 
-def play_sound(sound_name="Pop.aiff"):
-    sound_path = f"/System/Library/Sounds/{sound_name}"
-    if os.path.exists(sound_path):
-        os.system(f"afplay {sound_path}")
+def play_sound(sound_name: str):
+    sound_path = Path(f"/System/Library/Sounds/{sound_name}.aiff")
+    if sound_path.exists():
+        subprocess.run(
+            ["afplay", str(sound_path)],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
 
-def ensure_dirs():
-    os.makedirs(SWAP_DIR, exist_ok=True)
-    os.makedirs(JOURNAL_DIR, exist_ok=True)
 
-def get_latest_watch_entries():
-    files = sorted(glob.glob(os.path.join(JOURNAL_DIR, "*_task_closed.md")))
-    if not files:
-        return "", 0
-    latest_file = files[-1]
-    with open(latest_file, "r", encoding="utf-8") as f:
-        content = f.read().strip()
-    return content, len(files)
+def set_clipboard(text: str):
+    try:
+        proc = subprocess.Popen(["pbcopy"], stdin=subprocess.PIPE)
+        proc.communicate(text.encode("utf-8"))
+    except Exception as e:
+        print(f"⚠️ Ошибка копирования в буфер: {e}", file=sys.stderr)
 
-def get_task_contract():
-    if os.path.exists(TASK_FILE):
-        with open(TASK_FILE, "r", encoding="utf-8") as f:
-            return f.read().strip()
-    return ""
+
+def get_git_status() -> str:
+    try:
+        res = subprocess.run(
+            ["git", "status", "--short"],
+            cwd=BASE_DIR,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        return res.stdout.strip()
+    except Exception:
+        return "git status недоступен"
+
 
 def open_shift():
-    ensure_dirs()
-    timestamp_display = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    SWAP_DIR.mkdir(parents=True, exist_ok=True)
+    if not TASK_FILE.exists():
+        TASK_FILE.write_text(
+            "# ТАКТИЧЕСКИЙ КОНТРАКТ ЗАДАЧИ\n\n## Цель:\n\n## DoD:\n",
+            encoding="utf-8",
+        )
 
-    prompt_text = ""
-    if os.path.exists(PROMPT_FILE):
-        with open(PROMPT_FILE, "r", encoding="utf-8") as f:
-            prompt_text = f.read().strip()
+    context_payload = f"""# КОНТЕКСТ ВАХТЫ: ЛАБОРАТОРНЫЙ ПОЛИГОН
+- Дата: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+- Ветка Git: main
+- Активный стандарт: Правило 6 Паспорта (snake_case, без кириллицы/пробелов в путях кода).
 
-    task_content = get_task_contract()
-    if not task_content or "СТАТУС ВАХТЫ" in task_content:
-        task_content = f"""# КВАНТ РАБОТЫ: Новая задача
-Дата открытия: {timestamp_display}
-
-## 1. СКОУП
-- Изменять: 
-- Только чтение: 
-
-## 2. КОНТРАКТ
-- [Спецификация входов, выходов, инвариантов]
-
-## 3. КРИТЕРИЙ ПРИЕМКИ (Definition of Done)
-- Команда проверки: 
-- Ожидаемый результат: 
-
-## 4. СТАТУС
-- IN_PROGRESS
-
-{REMINDER_TEXT}"""
-        with open(TASK_FILE, "w", encoding="utf-8") as f:
-            f.write(task_content)
-
-    latest_log, total_logs = get_latest_watch_entries()
-
-    task_block = f"\n\n---\n\n# Оперативный контракт кванта (.swap/task.md)\n\n{task_content}"
-    watch_block = f"\n\n---\n\n# Оперативный контекст вахты\n\n{latest_log if latest_log else 'История смен пуста.'}\n\n{REMINDER_TEXT}"
-
-    final_payload = f"{prompt_text}{task_block}{watch_block}"
-
-    process = subprocess.Popen(["pbcopy"], stdin=subprocess.PIPE)
-    process.communicate(final_payload.encode("utf-8"))
-
-    play_sound("Pop.aiff")
+ЖЕСТКИЙ ИНВАРИАНТ ГЕНЕРАЦИИ АРТЕФАКТОВ:
+1. Модель отдает сохраняемые файлы монолитным блоком.
+2. Первая строка блока СТРОГО: ### FILE: <относительный_путь>
+3. Запрещено указывать имя файла в команде терминала.
+4. Вызов оператора в терминале ВСЕГДА только: save
+5. Команды выдавать строго по отдельности, без && и без heredoc.
+"""
+    set_clipboard(context_payload)
+    play_sound("Glass")
     print("✅ [OPEN] Контекст вахты скопирован в буфер обмена.")
     print(f"Инициализирован/проверен {TASK_FILE}")
 
+
+def status_shift():
+    print(f"📍 Репозиторий: {BASE_DIR}")
+    if TASK_FILE.exists():
+        print(f"📄 Контракт задачи ({TASK_FILE}):")
+        content = TASK_FILE.read_text(encoding="utf-8").strip()
+        print(content if content else "[Контракт пуст]")
+    else:
+        print("⚠️ Контракт .swap/task.md отсутствует.")
+
+    print("\n📦 Состояние Git:")
+    git_st = get_git_status()
+    if git_st:
+        print(git_st)
+    else:
+        print("Рабочее дерево чистое.")
+
+
 def close_shift():
-    ensure_dirs()
-    if not os.path.exists(TASK_FILE):
-        print("Файл .swap/task.md не найден. Нечего закрывать.")
+    git_st = get_git_status()
+    if not git_st:
+        print("ℹ️ Нет изменений для фиксации в Git.")
+        play_sound("Tink")
         return
 
-    with open(TASK_FILE, "r", encoding="utf-8") as f:
-        task_content = f.read().strip()
+    commit_msg = f"vahta: auto-close shift {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+    try:
+        subprocess.run(["git", "add", "."], cwd=BASE_DIR, check=True)
+        subprocess.run(["git", "commit", "-m", commit_msg], cwd=BASE_DIR, check=True)
+        play_sound("Glass")
+        print(f"✅ [CLOSE] Смена зафиксирована коммитом: {commit_msg}")
+    except subprocess.CalledProcessError as e:
+        play_sound("Sosumi")
+        print(f"❌ Ошибка коммита: {e}", file=sys.stderr)
+        sys.exit(1)
 
-    timestamp_file = datetime.now().strftime("%Y%m%d_%H%M%S")
-    timestamp_display = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    archive_file = os.path.join(JOURNAL_DIR, f"{timestamp_file}_task_closed.md")
-    shutil.copy2(TASK_FILE, archive_file)
-
-    summary_status = f"""# СТАТУС ВАХТЫ
-- Смена закрыта: {timestamp_display}
-- Архив смены: {os.path.relpath(archive_file, ROOT_DIR)}
-- Ядро и .swap/ сохранены.
-
-{REMINDER_TEXT}"""
-    with open(TASK_FILE, "w", encoding="utf-8") as f:
-        f.write(summary_status)
-
-    subprocess.run(["git", "add", archive_file, TASK_FILE], cwd=ROOT_DIR, check=False)
-    commit_msg = f"chore(watch_log): close shift {timestamp_file}"
-    commit_res = subprocess.run(["git", "commit", "-m", commit_msg], cwd=ROOT_DIR, capture_output=True, text=True)
-
-    play_sound("Glass.aiff")
-    print("✅ [CLOSE] Смена успешно закрыта.")
-    print(f"📝 Слепок сохранен: {os.path.relpath(archive_file, ROOT_DIR)}")
-    if commit_res.returncode == 0:
-        print(f"🔒 Зафиксирован коммит: {commit_msg}")
-    else:
-        print(f"ℹ️ Git status: {commit_res.stdout.strip() or commit_res.stderr.strip()}")
 
 def main():
     if len(sys.argv) < 2:
-        print("Использование: vahta.py [open|close|status]")
+        print("Использование: python3 scripts/vahta.py [open|status|close]")
         sys.exit(1)
 
     cmd = sys.argv[1].lower()
     if cmd == "open":
         open_shift()
+    elif cmd == "status":
+        status_shift()
     elif cmd == "close":
         close_shift()
-    elif cmd == "status":
-        if os.path.exists(TASK_FILE):
-            with open(TASK_FILE, "r", encoding="utf-8") as f:
-                print(f.read())
-        else:
-            print("Нет активной вахты (.swap/task.md отсутствует).")
     else:
         print(f"Неизвестная команда: {cmd}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()
