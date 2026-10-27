@@ -21,7 +21,7 @@
 ```text
 docs/
 ├── decisions/
-│   └── ADR-004_Lexicon_and_Thesaurus_Engine.md   # Архитектурный стандарт
+│   └── adr_004_lexicon_and_thesaurus_engine.md   # Архитектурный стандарт
 ├── manuals/
 │   └── user_guide_lexicon_thesaurus.md           # Данная инструкция
 ├── thesaurus/
