@@ -4,7 +4,8 @@
 """
 scripts/save_clip.py
 Утилита сохранения содержимого буфера обмена на диск.
-Поддерживает безаргументный запуск: парсит путь из первой строки `### FILE: <путь>`.
+Работает строго безаргументно через маркер в первой строке: ### FILE: <относительный_путь>.
+Любая передача аргументов командной строки запрещена и блокируется.
 """
 
 import os
@@ -47,6 +48,18 @@ def get_clipboard() -> str:
 
 
 def main():
+    # Полный запрет аргументов командной строки
+    if len(sys.argv) > 1:
+        play_sound("Sosumi")
+        notify("Лабораторный полигон", "Запрещено передавать путь аргументом")
+        print(
+            "❌ КРИТИЧЕСКОЕ НАРУШЕНИЕ РЕГЛАМЕНТА: передача аргументов командной строки запрещена!\n"
+            "   Путь обязан передаваться внутри буфера обмена: '### FILE: <путь>'.\n"
+            "   Вызов команды в терминале строго без параметров: save",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
     text = get_clipboard()
     if not text.strip():
         play_sound("Basso")
@@ -57,23 +70,17 @@ def main():
     target_path_raw = None
     content_to_write = text
 
-    # Если передан аргумент — выдаем строгое предупреждение о нарушении протокола
-    if len(sys.argv) > 1:
-        print("⚠️ ВНИМАНИЕ: Передача пути аргументом нарушает протокол бесшовного вызова save!")
-        print("⚠️ Стандартный вызов: скопировать блок с '### FILE: <путь>' и вызвать 'save' без аргументов.")
-        target_path_raw = sys.argv[1]
-    else:
-        lines = text.splitlines(keepends=True)
-        for i in range(min(5, len(lines))):
-            line = lines[i].strip()
-            m = re.match(r'^(?:### FILE:|<<<FILE_PATH:)\s*([^\s]+)', line)
-            if m:
-                target_path_raw = m.group(1)
-                content_to_write = "".join(lines[i + 1 :])
-                content_to_write = re.sub(
-                    r"<<<FILE_CONTENT_END>>>\s*$", "", content_to_write
-                )
-                break
+    lines = text.splitlines(keepends=True)
+    for i in range(min(5, len(lines))):
+        line = lines[i].strip()
+        m = re.match(r"^(?:### FILE:|<<<FILE_PATH:)\s*([^\s]+)", line)
+        if m:
+            target_path_raw = m.group(1)
+            content_to_write = "".join(lines[i + 1 :])
+            content_to_write = re.sub(
+                r"<<<FILE_CONTENT_END>>>\s*$", "", content_to_write
+            )
+            break
 
     if not target_path_raw:
         play_sound("Basso")
