@@ -1,11 +1,9 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 """
-scripts/save_clip.py
-Утилита сохранения содержимого буфера обмена на диск.
-Работает строго безаргументно через маркер в первой строке: ### FILE: <относительный_путь>.
-Любая передача аргументов командной строки запрещена и блокируется.
+НАЗНАЧЕНИЕ: Безопасное атомарное сохранение содержимого буфера обмена на SSD полигона.
+ПРОБЛЕМА: Исключение ручной вставки через heredoc (cat << 'EOF'), защита от выхода за пределы репозитория (Path Traversal) и предотвращение повреждения файлов при сбоях записи.
+ВХОД: Системный буфер обмена macOS (pbpaste). Первая строка (или одна из первых пяти) обязана содержать маркер '### FILE: <относительный_путь>'.
+ВЫХОД: Атомарно записанный файл на диске, звуковое уведомление macOS, отчет в stdout с относительным путем и размером.
+ЗАВИСИМОСТИ: Python 3.8+, утилиты macOS (pbpaste, afplay, osascript).
 """
 
 import os
@@ -17,7 +15,7 @@ from pathlib import Path
 VAULT_DIR = Path(__file__).resolve().parent.parent
 
 
-def play_sound(sound_name: str):
+def play_sound(sound_name: str) -> None:
     sound_path = Path(f"/System/Library/Sounds/{sound_name}.aiff")
     if sound_path.exists():
         subprocess.run(
@@ -27,7 +25,7 @@ def play_sound(sound_name: str):
         )
 
 
-def notify(title: str, message: str):
+def notify(title: str, message: str) -> None:
     script = f'display notification "{message}" with title "{title}"'
     subprocess.run(
         ["osascript", "-e", script],
@@ -47,14 +45,14 @@ def get_clipboard() -> str:
         sys.exit(1)
 
 
-def main():
-    # Полный запрет аргументов командной строки
+def main() -> None:
+    # 1. Запрет аргументов командной строки
     if len(sys.argv) > 1:
         play_sound("Sosumi")
         notify("Лабораторный полигон", "Запрещено передавать путь аргументом")
         print(
             "❌ КРИТИЧЕСКОЕ НАРУШЕНИЕ РЕГЛАМЕНТА: передача аргументов командной строки запрещена!\n"
-            "   Путь обязан передаваться внутри буфера обмена: '### FILE: <путь>'.\n"
+            "   Путь обязан передаваться внутри буфера обмена: '### FILE: <относительный_путь>'.\n"
             "   Вызов команды в терминале строго без параметров: save",
             file=sys.stderr,
         )
@@ -67,6 +65,7 @@ def main():
         print("⚠️ Буфер обмена пуст.", file=sys.stderr)
         sys.exit(1)
 
+    # 2. Поиск маркера пути в первых 5 строках
     target_path_raw = None
     content_to_write = text
 
@@ -91,28 +90,50 @@ def main():
         )
         sys.exit(1)
 
-    path_obj = Path(target_path_raw)
-    if not path_obj.is_absolute():
-        final_path = (VAULT_DIR / path_obj).resolve()
-    else:
-        final_path = path_obj.resolve()
-
-    try:
-        final_path.parent.mkdir(parents=True, exist_ok=True)
-        final_path.write_text(content_to_write, encoding="utf-8")
-        play_sound("Tink")
-    except Exception as e:
+    # 3. Валидация пути и защита от Path Traversal
+    raw_path_obj = Path(target_path_raw)
+    if raw_path_obj.is_absolute():
         play_sound("Sosumi")
-        notify("Лабораторный полигон", f"Ошибка диска: {e}")
-        print(f"❌ Ошибка записи в {final_path}: {e}", file=sys.stderr)
+        notify("Лабораторный полигон", "Запрещены абсолютные пути")
+        print(
+            f"❌ Ошибка безопасности: путь '{target_path_raw}' является абсолютным. "
+            "Разрешены только относительные пути внутри репозитория.",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
-    rel_path_str = str(final_path)
-    try:
-        rel_path_str = str(final_path.relative_to(VAULT_DIR))
-    except ValueError:
-        pass
+    final_path = (VAULT_DIR / raw_path_obj).resolve()
 
+    try:
+        final_path.relative_to(VAULT_DIR)
+    except ValueError:
+        play_sound("Sosumi")
+        notify("Лабораторный полигон", "Выход за пределы репозитория")
+        print(
+            f"❌ Ошибка безопасности: путь '{target_path_raw}' выходит за пределы корня репозитория ({VAULT_DIR}). "
+            "Операция отменена.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    # 4. Атомарная запись через временный файл
+    tmp_path = final_path.parent / f".{final_path.name}.tmp"
+    try:
+        final_path.parent.mkdir(parents=True, exist_ok=True)
+        tmp_path.write_text(content_to_write, encoding="utf-8")
+        os.replace(tmp_path, final_path)
+    except Exception as e:
+        if tmp_path.exists():
+            try:
+                tmp_path.unlink()
+            except OSError:
+                pass
+        play_sound("Sosumi")
+        notify("Лабораторный полигон", f"Ошибка диска: {e}")
+        print(f"❌ Ошибка транзакционной записи в {final_path}: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    rel_path_str = str(final_path.relative_to(VAULT_DIR))
     report = f"✅ [SAVE] Записано на диск: {rel_path_str} ({len(content_to_write)} симв.)"
     print(report)
     play_sound("Glass")
