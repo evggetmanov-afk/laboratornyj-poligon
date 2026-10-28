@@ -15,3 +15,6 @@
 *~
 projects/dispetcher/
 .swap/session_counter.json
+
+# Локальные временные директории
+tmp/
